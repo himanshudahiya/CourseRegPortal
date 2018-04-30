@@ -1,0 +1,43 @@
+<h3>The following courses are floated this semester. Kindly choose accrding to your credit limit</h3>
+
+<h3>Courses floated to your batch</h3>
+<ul>
+{% for to_your_batch_objs in to_your_batch%}
+
+<form action="{% url 'studentportal:add_course_batch'%}" method="post">
+	{% csrf_token %}
+	<li>{{to_your_batch_objs.course_id.course_id}}: {{to_your_batch_objs.course_id.title}} (LTP: {{to_your_batch_objs.course_id.credit_struct}}) (Slot: {{to_your_batch_objs.slot}})
+	<button type="submit" name="Add_Course" value="{{to_your_batch_objs.faculty_id.faculty_id}}+{{to_your_batch_objs.course_id.course_id}}+{{to_your_batch_objs.section_id}}+{{to_your_batch_objs.semester}}+{{to_your_batch_objs.year}}+{{to_your_batch_objs.slot}}">Add Course</button>
+	{%if error_message %}
+		<p style="color: red">{{error_message}}</p>
+	{%endif%}
+	</li>
+	
+</form>
+{% endfor %}
+</ul>
+<h3>Courses floated to other batches</h3>
+
+<ul>
+{% for to_other_batch_objs in to_other_batch%}
+<li>{{to_other_batch_objs.course_id.course_id}}: {{to_other_batch_objs.course_id.title}} (LTP: {{to_other_batch_objs.course_id.credit_struct}}) (Slot: {{to_other_batch_objs.slot}})</li>
+
+{% endfor %}
+</ul>
+<h3>Registered courses</h3>
+<ul>
+{% for succ_reg_objs in successful_registered%}
+<li>{{succ_reg_objs.course_id.course_id}}: {{succ_reg_objs.course_id.title}} (LTP: {{succ_reg_objs.course_id.credit_struct}}) (Slot: {{succ_reg_objs.slot}})</li>
+
+{% endfor %}
+</ul>
+
+<h3>Tokened courses</h3>
+
+<ul>
+{% for tokened_objs in tokened%}
+<li>{{tokened_objs.course_id.course_id}}: {{tokened_objs.course_id.title}} (LTP: {{tokened_objs.course_id.credit_struct}}) (Slot: {{tokened_objs.slot}})</li>
+
+{% endfor %}
+</ul>
+

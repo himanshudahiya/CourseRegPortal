@@ -1,3 +1,30 @@
-hello {{ username }}
+hello {{ student_obj.name }}
+
+<br>
+<h3>Your courses this semester</h3>
+<ul>
+	{% for takes in takes_obj %}
+	{% if student_obj.current_sem == takes.teaches.semester%}
+	{% for year in years%}
+	{% if year == student_obj.current_year %}
+	<li>{{takes.teaches.course_id.course_id}}: {{takes.teaches.course_id.title}} (LTP: {{takes.teaches.course_id.credit_struct}}) (Slot: {{takes.teaches.slot}})</li>
+	{% endif%}
+	{% endfor %}
+	{% endif %}
+	{% endfor %}
+</ul>
+<h3>Department: {{student_obj.dept_id.dept_name}}</h3>
+<h3>Section: {{student_obj.section_id}}</h3>
+<h3>Current Year: {{student_obj.current_year}}</h3>
+<h3>Current Semester: {{ student_obj.current_sem }}</h3>
+<h3>Your Grade:  {{student_obj.cgpa}}</h3>
+<h3>Current Registered Credits: {{student_obj.curr_registered_credits}}</h3>
+<h3>Max Credit(This semester): {{student_obj.max_credit}}</h3>
+<h3>Total Credits Passes: {{student_obj.total_credits}}</h3>
+
+<a href="{% url 'studentportal:register_courses'%}">Register Courses</a>
+<br>
+<br>
+<br>
 
 <a href="{% url 'studentportal:logout' %}">Logout</a>
