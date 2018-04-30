@@ -16,6 +16,11 @@ class batch(models.Model):
 	def __str__(self):
 		return self.dept.dept_name + " " + str(self.year)
 
+class section(models.Model):
+	section_id = models.CharField(max_length=2)
+	def __str__(self):
+		return self.section_id
+
 class student(models.Model):
 	student_id=models.CharField(max_length=25,primary_key=True)
 	name=models.CharField(max_length=40)
@@ -27,7 +32,7 @@ class student(models.Model):
 	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)])
 	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)])
 	password=models.CharField(max_length=12)
-	section_id=models.CharField(max_length=25, default='A')
+	section_id=models.ForeignKey(section)
 	
 	def __str__(self):
    		return self.name
@@ -102,16 +107,16 @@ class related(models.Model):
 class teaches(models.Model):
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	course_id=models.ForeignKey(course,on_delete=models.CASCADE)
-	section_id=models.CharField(max_length=25)
+	section_id=models.ManyToManyField(section)
 	semester=models.IntegerField(default=1, validators=[MaxValueValidator(2),MinValueValidator(1)])
 	year=models.IntegerField()
 	slot=models.CharField(max_length=2)
 	min_cgpa_constraint=models.DecimalField(decimal_places=2,max_digits=3)
 	batch = models.ManyToManyField(batch)
 	class Meta:
-		unique_together=('faculty_id','section_id','course_id','semester','year','slot')
+		unique_together=('faculty_id','course_id','semester','year','slot')
 	def __str__(self):
-   		return self.faculty_id.name + " " + self.course_id.course_id
+   		return self.course_id.title + " " + self.course_id.course_id
 
 class takes(models.Model):
 	student_obj=models.ForeignKey(student,on_delete=models.CASCADE)
@@ -132,13 +137,13 @@ class successfull_register(models.Model):
 class token(models.Model):
 	student_obj=models.ForeignKey(student,on_delete=models.CASCADE)
 	teaches=models.ForeignKey(teaches,on_delete=models.CASCADE)
-	status=models.TextField()
-
+	status=models.IntegerField()
+	reason=models.TextField(default = ":and:")
 
 	class Meta:
 		unique_together=('student_obj','teaches')
 	def __str__(self):
-   		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
+   		return self.student_obj.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
 class grades(models.Model):
 	student_id=models.ForeignKey(student,on_delete=models.CASCADE)
