@@ -6,7 +6,7 @@
 <ul>
 	{% for courses in depts_course %}
 	{% if courses.dept_id.dept_id == dept_obj.dept_id %}
-	<li>{{courses.title}}</li>
+	<li>{{courses.title}}<a href="/dean_staff_office/edit_course/{{courses.course_id}}">Edit</a></li>
 	{% endif %}
 	{% endfor %}
 </ul>

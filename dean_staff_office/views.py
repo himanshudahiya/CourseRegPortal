@@ -109,8 +109,6 @@ def course_post(request):
 			course_title = request.POST['course_title']
 			course_ltp = request.POST['course_ltp_struct']
 			course_dept = request.POST['course_dept']
-
-			print("course_dept=", course_dept)
 			if course_dept == "--":
 				global error_message
 				error_message = "Select Department"
@@ -129,5 +127,41 @@ def course_post(request):
 			return redirect('/dean_staff_office/add_course')
 		else:
 			return redirect('/dean_staff_office/')
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def edit_course(request, course_id):
+	if request.session.has_key('staff_id'):
+		course_obj = course.objects.get(course_id = str(course_id))
+		dept_objs = department.objects.all()
+		context = {'dept_objs':dept_objs, 'course_obj':course_obj}
+		template = loader.get_template('dean_staff_office/add_course.html')
+		return HttpResponse(template.render(context, request))
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def course_edit(request, course_id_prev):
+	if request.session.has_key('staff_id'):
+		course_id = request.POST['course_id']
+		course_title = request.POST['course_title']
+		course_ltp = request.POST['course_ltp_struct']
+		course_dept = request.POST['course_dept']
+		if course_dept == "--":
+			global error_message
+			error_message = "Select Department"
+			return redirect('/edit_course/course_id')
+		else:
+			dept_obj = department.objects.get(dept_id = course_dept)
+
+		course_obj = course.objects.get(course_id = course_id_prev)
+		course_obj.course_id = course_id
+		course_obj.title = course_title
+		course_obj.credit_struct = course_ltp
+		course_obj.dept_id = dept_obj
+		course_obj.save()
+		return redirect('/dean_staff_office/course_catalogue/')
+
 	else:
 		return redirect('/dean_staff_office/')
