@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 # Create your models here.
 
 class department(models.Model):
-	dept_id=models.CharField(max_length=25,primary_key=True)
+	dept_id=models.IntegerField()
 	dept_name=models.CharField(max_length=25)
 	def __str__(self):
    		return self.dept_name
