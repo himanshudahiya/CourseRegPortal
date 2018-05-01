@@ -137,7 +137,7 @@ def register_courses(request):
 				elif tokened_objs.teaches in to_other_batch:
 					to_other_batch.remove(tokened_objs.teaches)
 				tokened.append(tokened_objs.teaches)
-			print(error_message)
+			global error_message
 			context = {'student_obj':student_obj, 
 				'to_your_batch': to_your_batch,
 				'to_other_batch': to_other_batch, 
@@ -190,12 +190,13 @@ def add_course_batch(request):
 				same_slot_courses.append(teaches_t)
 		#same slot
 		if len(same_slot_courses) > 0:
+			global error_message
 			error_message = 'You have a course registered in same slot.'
-			print(error_message)
 			return redirect('studentportal:register_courses')
 
 		if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 			token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "CGPA not satisfied")
+			global error_message
 			error_message = ''
 			course_tokened = True
 		
@@ -209,10 +210,37 @@ def add_course_batch(request):
 				token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 			else:
 				token_tttt.reason = token_tttt.reason + " :and: " + "Credit limit not satisfied"
+			global error_message
 			error_message = ''
 			token_tttt.save()
 			course_tokened = True
-			return redirect('studentportal:register_courses')
+		
+		# prerequistes
+		prerequistes_list = selected_course_obj.prerequisite.all()
+		for prerequisite_tt in prerequistes_list:
+			if teaches.objects.filter(course_id = prerequisite_tt.course_id).exists():
+				prereq_teaches = teaches.objects.filter(course_id = prerequisite_tt.course_id)
+				prereq_cleared = False
+				for prereq_teaches_tt in prereq_teaches:
+					if grades.objects.filter(student_id = student_obj, teaches = prereq_teaches_tt).exists():
+						grades_obj_prereq = grades.objects.get(student_id = student_obj, teaches = prereq_teaches_tt)
+						grade_prereq = grades_obj_prereq.grade
+						if grade_prereq != 0:
+							prereq_cleared = True
+						else:
+							if course_tokened == False:
+								token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Prerequisite not cleared")
+								course_tokened = True
+							else:
+								token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
+								course_tokened = True
+			else:
+				if course_tokened == False:
+					token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Prerequisite not cleared")
+					course_tokened = True
+				else:
+					token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
+					course_tokened = True
 
 		if course_tokened:
 			token_tttt.save()
@@ -223,6 +251,7 @@ def add_course_batch(request):
 			registered_courses_ttt.save()
 			student_obj.curr_registered_credits = student_obj.curr_registered_credits + course_credit
 			student_obj.save()
+			global error_message
 			error_message = ''
 			return redirect('studentportal:register_courses')
 		return redirect('studentportal:register_courses')
@@ -263,12 +292,14 @@ def add_course_other_batch(request):
 				same_slot_courses.append(teaches_t)
 		#same slot
 		if len(same_slot_courses) > 0:
+			global error_message
 			error_message = 'You have a course registered in same slot.'
 			print(error_message)
 			return redirect('studentportal:register_courses')
 		token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Student is of other batch")
 		if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 			token_tttt.reason = "CGPA not satisfied" + " :and: " + token_tttt.reason 
+			global error_message
 			error_message = ''
 		
 		course_credit = 0
@@ -279,20 +310,31 @@ def add_course_other_batch(request):
 		if student_obj.curr_registered_credits + course_credit > student_obj.max_credit:
 			# token_tttt.reason = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 			token_tttt.reason = "Credit limit not satisfied" +  " :and: " + token_tttt.reason 
+			global error_message
 			error_message = ''
 
-
-
+		prerequistes_list = selected_course_obj.prerequisite.all()
+		for prerequisite_tt in prerequistes_list:
+			if teaches.objects.filter(course_id = prerequisite_tt.course_id).exists():
+				prereq_teaches = teaches.objects.filter(course_id = prerequisite_tt.course_id)
+				prereq_cleared = False
+				for prereq_teaches_tt in prereq_teaches:
+					if grades.objects.filter(student_id = student_obj, teaches = prereq_teaches_tt).exists():
+						grades_obj_prereq = grades.objects.get(student_id = student_obj, teaches = prereq_teaches_tt)
+						grade_prereq = grades_obj_prereq.grade
+						if grade_prereq != 0:
+							prereq_cleared = True
+						else:
+							token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
+			else:
+				token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
+				
 		if student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
+			global error_message
 			error_message = ''
 			token_tttt.save()
 			return redirect('studentportal:register_courses')
-		# elif student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
-		# 	registered_courses_ttt = successfull_register(student_id = student_obj, teaches = selected_course_obj)
-		# 	registered_courses_ttt.save()
-		# 	global error_message
-		# 	error_message = ''
-		# 	return redirect('studentportal:register_courses')
+		
 		token_tttt.save()
 		return redirect('studentportal:register_courses')
 	else:
