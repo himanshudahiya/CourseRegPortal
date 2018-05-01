@@ -20,4 +20,6 @@ urlpatterns = [
     url('^admin/', admin.site.urls),
     url('^register/', include('register.urls')),
     url('^studentportal/', include('studentportal.urls')),
+    url('^facultyportal/', include('facultyportal.urls')),
+
 ]

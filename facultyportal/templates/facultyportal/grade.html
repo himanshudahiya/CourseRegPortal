@@ -1,0 +1,38 @@
+hello {{ faculty_id.name }}
+
+<br>
+<h3>Your students this semester</h3>
+<ul>
+    {% for student_n in takes_obj %}    
+    <li>{{name}}: {{student_n.student_obj.name}} </li>  
+    Enter the grade
+    <form action="/facultyportal/update_grade/{{student_n.student_obj.student_id}}/{{student_n.teaches.course_id.course_id}}" method='post'>
+    	{% csrf_token %}
+   <select name="grade">
+   <option value="A">A</option>
+   <option value="B">B</option>
+   <option value="C">C</option>
+   <option value="D">D</option>
+   </select>
+
+  <input type="submit" value="update">
+</form>
+
+
+    {% endfor %}
+   
+</ul>
+
+
+  
+  
+
+
+
+
+<!-- """<a href="{% url 'studentportal:register_courses'%}">Register Courses</a> -->
+<!-- <br>
+<br>
+<br>
+ -->
+<a href="{% url 'facultyportal:logout' %}">Logout</a>

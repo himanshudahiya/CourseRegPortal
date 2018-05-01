@@ -7,7 +7,7 @@
 <form action="{% url 'studentportal:add_course_batch'%}" method="post">
 	{% csrf_token %}
 	<li>{{to_your_batch_objs.course_id.course_id}}: {{to_your_batch_objs.course_id.title}} (LTP: {{to_your_batch_objs.course_id.credit_struct}}) (Slot: {{to_your_batch_objs.slot}})
-	<button type="submit" name="Add_Course" value="{{to_your_batch_objs.faculty_id.faculty_id}}+{{to_your_batch_objs.course_id.course_id}}+{{to_your_batch_objs.section_id}}+{{to_your_batch_objs.semester}}+{{to_your_batch_objs.year}}+{{to_your_batch_objs.slot}}">Add Course</button>
+	<button type="submit" name="Add_Course" value="{{to_your_batch_objs.faculty_id.faculty_id}}+{{to_your_batch_objs.course_id.course_id}}+{{to_your_batch_objs.semester}}+{{to_your_batch_objs.year}}+{{to_your_batch_objs.slot}}">Add Course</button>
 	{%if error_message %}
 		<p style="color: red">{{error_message}}</p>
 	{%endif%}

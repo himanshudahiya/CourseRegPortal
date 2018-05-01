@@ -11,7 +11,7 @@ class department(models.Model):
    		return self.dept_name
 
 class batch(models.Model):
-	dept=models.ForeignKey(department)
+	dept=models.ForeignKey(department,on_delete=models.CASCADE)
 	year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)])
 	def __str__(self):
 		return self.dept.dept_name + " " + str(self.year)
@@ -27,10 +27,14 @@ class student(models.Model):
 	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)])
 	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)])
 	password=models.CharField(max_length=12)
-	section_id=models.CharField(max_length=25, default='A')
 	
 	def __str__(self):
    		return self.name
+
+class current(models.Model):
+	current_year=models.IntegerField()
+	current_sem=models.IntegerField()
+
 
 class course(models.Model):
 	course_id=models.CharField(max_length=25,primary_key=True)
@@ -102,14 +106,13 @@ class related(models.Model):
 class teaches(models.Model):
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	course_id=models.ForeignKey(course,on_delete=models.CASCADE)
-	section_id=models.CharField(max_length=25)
 	semester=models.IntegerField(default=1, validators=[MaxValueValidator(2),MinValueValidator(1)])
 	year=models.IntegerField()
 	slot=models.CharField(max_length=2)
 	min_cgpa_constraint=models.DecimalField(decimal_places=2,max_digits=3)
 	batch = models.ManyToManyField(batch)
 	class Meta:
-		unique_together=('faculty_id','section_id','course_id','semester','year','slot')
+		unique_together=('faculty_id','course_id','semester','year','slot')
 	def __str__(self):
    		return self.faculty_id.name + " " + self.course_id.course_id
 

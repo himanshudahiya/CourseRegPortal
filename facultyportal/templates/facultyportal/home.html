@@ -1,0 +1,22 @@
+hello {{ faculty_obj.name }}
+
+<br>
+<h3>Your courses this semester</h3>
+<ul>
+    {% for teaches in teaches_obj %}
+
+    {% if current_year == teaches.year and current_sem == teaches.semester  %}
+    <li><a href="{% url 'facultyportal:grade' course_id=teaches.course_id.course_id %}">{{teaches.course_id}}: {{teaches.course_id.title}} (LTP: {{teaches.course_id.credit_struct}}) (Slot: {{teaches.slot}})</a></li>
+    {% endif %}
+    {% endfor %}
+</ul>
+<h3>Department: {{faculty_obj.dept_id.dept_name}}</h3>
+
+<h3>Email_id: {{faculty_obj.email_id}}</h3>
+
+<!-- """<a href="{% url 'studentportal:register_courses'%}">Register Courses</a> -->
+<!-- <br>
+<br>
+<br>
+ -->
+<a href="{% url 'facultyportal:logout' %}">Logout</a>

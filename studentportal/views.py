@@ -22,13 +22,13 @@ def login_user(request):
 	    password = request.POST['password']
 	    if student_id is not None:
 	    	student_obj = student.objects.get(student_id = student_id)
-	        if student is None:
+	    	if student_obj is None:
 	        	context = {
 	        		'error_message': 'Invalid login'
 	        	}
 	        	template = loader.get_template('studentportal/login.html')
 	        	return HttpResponse(template.render(context, request))
-	        elif student_obj is not None:
+	    	elif student_obj is not None:
 	        	if student_obj.password == password:
 	        		request.session['student_id'] = student_id
 	        		return redirect('/studentportal/home')
@@ -36,7 +36,7 @@ def login_user(request):
 	        		context = {'error_message': 'Invalid login'}
 	        		template = loader.get_template('studentportal/login.html')
 	        		return HttpResponse(template.render(context, request))
-	        else:
+	    	else:
 	        	context = {
 	        		'error_message': 'Invalid login'
 	        	}
@@ -65,6 +65,20 @@ def home(request):
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/studentportal/')
+def view_grades(request):
+	if request.session.has_key('student_id'):
+		student_id=request.session['student_id']
+		student_obj = student.objects.get(student_id = student_id)
+		template = loader.get_template('studentportal/view_grades.html')
+		grades_obj= grades.objects.filter(student_id = student_obj)
+		print(grades_obj)
+		context = {'student_obj':student_obj,'grades_obj':grades_obj}
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/studentportal/')
+
+
+
 		
 def register_courses(request, error_message=None):
 	if request.session.has_key('student_id'):
@@ -122,10 +136,9 @@ def add_course_batch(request):
 	course_attr = selected_course.split('+')
 	faculty_id = (course_attr[0])
 	course_id = (course_attr[1])
-	section_id = str(course_attr[2])
-	semester = int(course_attr[3])
-	year = int(course_attr[4])
-	slot = str(course_attr[5])
+	semester = int(course_attr[2])
+	year = int(course_attr[3])
+	slot = str(course_attr[4])
 
 	# takes_obj = takes.objects.filter(student_obj = student_obj)
 	# current_courses = []
@@ -142,7 +155,7 @@ def add_course_batch(request):
 	student_obj = student.objects.get(student_id = student_id)
 	faculty_id_obj = faculty.objects.get(faculty_id = faculty_id)
 	course_id_obj = course.objects.get(course_id = course_id)
-	selected_course_obj = teaches.objects.get(faculty_id = faculty_id_obj, course_id = course_id_obj, section_id = section_id, semester = semester, year = year, slot = slot)
+	selected_course_obj = teaches.objects.get(faculty_id = faculty_id_obj, course_id = course_id_obj, semester = semester, year = year, slot = slot)
 	error_message = ''
 	print(selected_course_obj)
 	# cgpa constraint
@@ -184,4 +197,4 @@ def add_course_batch(request):
 
 
 
-	
+

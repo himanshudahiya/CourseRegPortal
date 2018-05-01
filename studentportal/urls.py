@@ -10,5 +10,6 @@ urlpatterns = [
 	url('^home/', views.home, name='home'),
 	url('^login', views.login_user, name='login'),
 	url('^register_courses', views.register_courses, name='register_courses'),
+	url('^view_grades', views.view_grades, name='view_grades'),
 	url('^add_course_batch', views.add_course_batch, name='add_course_batch')
 ]

@@ -1,0 +1,13 @@
+hello {{ student_obj.name }}
+
+<br>
+<h3>Your grades this semester</h3>
+<ul>
+	{% for subject in grades_obj %}
+
+	 <li> Course Name:{{subject.teaches.course_id.title}}   Faculty Name:{{subject.teaches.faculty_id.name}} grade:{{subject.grade}}</li>
+	
+	{% endfor %}
+</ul>
+
+<a href="{% url 'studentportal:logout' %}">Logout</a>
