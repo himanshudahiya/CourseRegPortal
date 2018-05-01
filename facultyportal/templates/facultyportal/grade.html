@@ -1,0 +1,22 @@
+hello {{ faculty_id.name }}
+
+<br>
+<h3>Your students this semester</h3>
+<ul>
+    {% for student_n in takes_obj %}
+
+    
+    <li>{{name}}: {{student_n.student_obj.name}} </li>
+    {% endfor %}
+   
+</ul>
+<h3>Department: {{faculty_id.dept_id.dept_name}}</h3>
+
+<h3>Email_id: {{faculty_id.email_id}}</h3>
+
+<!-- """<a href="{% url 'studentportal:register_courses'%}">Register Courses</a> -->
+<!-- <br>
+<br>
+<br>
+ -->
+<a href="{% url 'facultyportal:logout' %}">Logout</a>

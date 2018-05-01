@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'register',
     'studentportal',
+    'facultyportal',
     'dean_staff_office',
 ]
 

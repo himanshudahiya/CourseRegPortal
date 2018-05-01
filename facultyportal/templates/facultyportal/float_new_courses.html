@@ -1,0 +1,43 @@
+
+<h3>Select the courses you need to float and specify the required details</h3>
+
+
+<form action="{% url 'facultyportal:add_course_float'%}" method="post">
+  {% csrf_token %}
+
+  Select a Course to be floated 
+  <select name = "course_floated">
+  	   {% for courses in courses_of_dept %}
+  		 <option value={{courses.course_id}}>{{courses.course_id}}</option>
+       {% endfor %}
+ 
+  </select> <br><br>
+
+Write the slot
+ <input name="slot" type="text"> 
+ <br><br>
+
+Minimum CGPA criteria (1-10)
+ <input type="number" name="min_cg" min="1" max="10">
+ <br><br>
+ 
+Select the batch
+ <select name = "batches" multiple>
+   {% for batch in batch_obj %}
+   <option value="{{batch.dept.dept_id}}+{{batch.year}}">{{batch.year}} {{batch.dept}}</option>
+   {% endfor %}
+ </select>
+ <br>
+ <br>
+
+Select the prerequisite courses 
+  <select name = "prerequisite" multiple>
+       {% for courses in courses_of_dept %}
+       <option value={{courses.course_id}}>{{courses.course_id}}</option>
+       {% endfor %}
+ 
+  </select>
+<br><br>
+
+<input type="submit" name="Submit" value="submit">
+</form>

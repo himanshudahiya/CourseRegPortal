@@ -2,8 +2,9 @@ from __future__ import unicode_literals
 from django import forms
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+import datetime
 # Create your models here.
-
+now = datetime.datetime.now()
 class department(models.Model):
 	dept_id=models.IntegerField()
 	dept_name=models.CharField(max_length=25)
@@ -107,6 +108,7 @@ class teaches(models.Model):
 	slot=models.CharField(max_length=2)
 	min_cgpa_constraint=models.DecimalField(decimal_places=2,max_digits=3)
 	batch = models.ManyToManyField(batch)
+	prerequisite = models.ManyToManyField(course, related_name = "prerequisites")
 	class Meta:
 		unique_together=('faculty_id','course_id','semester','year','slot')
 	def __str__(self):
@@ -147,5 +149,6 @@ class grades(models.Model):
    		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
 
-
-
+class current(models.Model):
+	current_year = models.IntegerField(default=now.year)
+	current_sem = models.IntegerField(default=1)
