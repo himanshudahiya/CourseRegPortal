@@ -16,10 +16,6 @@ class batch(models.Model):
 	def __str__(self):
 		return self.dept.dept_name + " " + str(self.year)
 
-class section(models.Model):
-	section_id = models.CharField(max_length=2)
-	def __str__(self):
-		return self.section_id
 
 class student(models.Model):
 	student_id=models.CharField(max_length=25,primary_key=True)
@@ -106,7 +102,6 @@ class related(models.Model):
 class teaches(models.Model):
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	course_id=models.ForeignKey(course,on_delete=models.CASCADE)
-	section_id=models.ManyToManyField(section)
 	semester=models.IntegerField(default=1, validators=[MaxValueValidator(2),MinValueValidator(1)])
 	year=models.IntegerField()
 	slot=models.CharField(max_length=2)
