@@ -113,21 +113,6 @@ def register_courses(request):
 						to_your_batch.append(teaches_t)
 				elif teaches_t not in to_your_batch and teaches_t not in to_other_batch:
 						to_other_batch.append(teaches_t)
-		# student_section = student_obj.section_id.section_id
-		# for to_your_batch_objs in to_your_batch:
-		# 	floated_course_section_list = to_your_batch_objs.section_id.all()
-		# 	print(floated_course_section_list)
-		# 	student_section_match = False
-		# 	for sections in floated_course_section_list:
-		# 		if sections.section_id == student_section:
-		# 			print("Student can take")
-		# 			student_section_match = True
-		# 		else:
-		# 			print("student cannot take")
-		# 	if student_section_match == False:
-		# 		to_your_batch.remove(to_your_batch_objs)
-
-
 		successful_registered = []
 		tokened = []
 		success_reg_obj = successfull_register.objects.filter(student_id = student_obj)
