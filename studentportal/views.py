@@ -27,27 +27,32 @@ def login_user(request):
 	    student_id = request.POST['username']
 	    password = request.POST['password']
 	    if student_id is not None:
-	    	student_obj = student.objects.get(student_id = student_id)
-	        if student_obj is None:
-	        	context = {
-	        		'error_message': 'Invalid login'
-	        	}
-	        	template = loader.get_template('studentportal/login.html')
-	        	return HttpResponse(template.render(context, request))
-	        elif student_obj is not None:
-	        	if student_obj.password == password:
-	        		request.session['student_id'] = student_id
-	        		return redirect('/studentportal/home')
-	        	else:
-	        		context = {'error_message': 'Invalid login'}
-	        		template = loader.get_template('studentportal/login.html')
-	        		return HttpResponse(template.render(context, request))
-	        else:
-	        	context = {
-	        		'error_message': 'Invalid login'
-	        	}
-	        	template = loader.get_template('studentportal/login.html')
-	        	return HttpResponse(template.render(context, request))
+	    	if student.objects.filter(student_id = student_id).exists():
+	    		student_obj = student.objects.get(student_id = student_id)
+		        if student_obj is None:
+		        	context = {
+		        		'error_message': 'Invalid login'
+		        	}
+		        	template = loader.get_template('studentportal/login.html')
+		        	return HttpResponse(template.render(context, request))
+		        elif student_obj is not None:
+		        	if student_obj.password == password:
+		        		request.session['student_id'] = student_id
+		        		return redirect('/studentportal/home')
+		        	else:
+		        		context = {'error_message': 'Invalid login'}
+		        		template = loader.get_template('studentportal/login.html')
+		        		return HttpResponse(template.render(context, request))
+		        else:
+		        	context = {
+		        		'error_message': 'Invalid login'
+		        	}
+		        	template = loader.get_template('studentportal/login.html')
+		        	return HttpResponse(template.render(context, request))
+	    	else:
+		    	context = {'error_message': 'Invalid login'}
+		    	template = loader.get_template('studentportal/login.html')
+		    	return HttpResponse(template.render(context, request))
 	return redirect('/studentportal/')
 
 
@@ -94,19 +99,19 @@ def register_courses(request):
 						to_your_batch.append(teaches_t)
 				elif teaches_t not in to_your_batch and teaches_t not in to_other_batch:
 						to_other_batch.append(teaches_t)
-		student_section = student_obj.section_id.section_id
-		for to_your_batch_objs in to_your_batch:
-			floated_course_section_list = to_your_batch_objs.section_id.all()
-			print(floated_course_section_list)
-			student_section_match = False
-			for sections in floated_course_section_list:
-				if sections.section_id == student_section:
-					print("Student can take")
-					student_section_match = True
-				else:
-					print("student cannot take")
-			if student_section_match == False:
-				to_your_batch.remove(to_your_batch_objs)
+		# student_section = student_obj.section_id.section_id
+		# for to_your_batch_objs in to_your_batch:
+		# 	floated_course_section_list = to_your_batch_objs.section_id.all()
+		# 	print(floated_course_section_list)
+		# 	student_section_match = False
+		# 	for sections in floated_course_section_list:
+		# 		if sections.section_id == student_section:
+		# 			print("Student can take")
+		# 			student_section_match = True
+		# 		else:
+		# 			print("student cannot take")
+		# 	if student_section_match == False:
+		# 		to_your_batch.remove(to_your_batch_objs)
 
 
 		successful_registered = []

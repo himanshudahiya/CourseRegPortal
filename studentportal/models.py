@@ -25,15 +25,14 @@ class student(models.Model):
 	student_id=models.CharField(max_length=25,primary_key=True)
 	name=models.CharField(max_length=40)
 	dept_id=models.ForeignKey(department,on_delete=models.CASCADE)
-	cgpa=models.DecimalField(decimal_places=2,max_digits=3)
-	curr_registered_credits=models.IntegerField()
-	max_credit=models.IntegerField()
-	total_credits=models.IntegerField()
-	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)])
-	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)])
-	password=models.CharField(max_length=12)
-	section_id=models.ForeignKey(section)
-	
+	cgpa=models.DecimalField(decimal_places=2,max_digits=3,default=0)
+	curr_registered_credits=models.IntegerField(default=0)
+	max_credit=models.IntegerField(default=24)
+	total_credits=models.IntegerField(default=0)
+	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)],default=1)
+	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)],default=1)
+	password=models.CharField(max_length=50,default="abcdefgh")
+	student_email=models.CharField(max_length=100, default="")	
 	def __str__(self):
    		return self.name
 
