@@ -1,0 +1,20 @@
+<h3>Course Catalogue</h3>
+
+{% for dept_obj in dept_objs%}
+<h3>{{dept_obj.dept_name}}</h3>
+{% for depts_course in depts_courses %}
+<ul>
+	{% for courses in depts_course %}
+	{% if courses.dept_id.dept_id == dept_obj.dept_id %}
+	<li>{{courses.title}}<a href="/dean_staff_office/edit_course/{{courses.course_id}}">Edit</a></li>
+	{% endif %}
+	{% endfor %}
+</ul>
+
+
+{% endfor %}
+{% endfor %}
+
+<a href="{% url 'dean_staff_office:add_course' %}">Add New Course</a>
+<br>
+<a href="{% url 'dean_staff_office:home' %}">Back to Home</a>

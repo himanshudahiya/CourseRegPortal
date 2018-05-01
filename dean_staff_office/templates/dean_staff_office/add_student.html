@@ -1,0 +1,100 @@
+<head>
+    {% if student_obj%}
+    <title>Edit Student</title>
+    {% else %}
+    <title>Add New Student</title>
+    {%endif%}
+</head>
+{% block title %}
+{% if student_obj %}
+Edit Student
+{% else %}
+Add New Student
+{% endif %}
+{% endblock %}
+{% block body %}
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-sm-12 col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    
+                    {% if error_message %}
+                        <p style="color: red"><strong>{{ error_message }}</strong></p>
+                    {% endif %}
+                    {% if good_message %}
+                        <p style="color: blue"><strong>{{good_message}}</strong></p>
+                    {% endif %}
+                    {% if student_obj %}
+                    <form class="form-horizontal" role="form" action="/dean_staff_office/student_edit_post/{{student_obj.student_id}}" method="post" enctype="multipart/form-data">
+                    {% else %}
+                    <form class="form-horizontal" role="form" action="{% url 'dean_staff_office:student_post'%}" method="post" enctype="multipart/form-data">
+                    {% endif %}
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="id_student_id">
+                                Student ID:
+                            </label>
+                            <div class="col-sm-10">
+                                {% if student_obj%}
+                                <input id="id_student_id" maxlength="30" name="student_id" type="text" value="{{student_obj.student_id}}" required>
+                                {% else %}
+                                <input id="id_student_id" maxlength="30" name="student_id" type="text" required>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="id_student_title">
+                                Student Name:
+                            </label>
+                            <div class="col-sm-10">
+                                {% if student_obj %}
+                                <input id="id_student_title" maxlength="30" name="student_title" type="text" value="{{student_obj.name}}" required>
+                                {% else %}
+                                <input id="id_student_title" maxlength="30" name="student_title" type="text" required>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">
+                                Department:
+                            </label>
+                            <div class="col-sm-10">
+                                <select name="student_dept" required>
+                                    <option value="">--</option>
+                                    {% for dept in dept_objs%}
+                                    {% if student_obj %}
+                                        {% if dept.dept_id == student_obj.dept_id.dept_id%}
+                                        <option value="{{dept.dept_id}}" selected="selected">{{dept.dept_name}}</option>
+                                        {% else %}
+                                        <option value="{{dept.dept_id}}">{{dept.dept_name}}</option>
+                                        {% endif %}
+                                    {% else %}
+                                        <option value="{{dept.dept_id}}">{{dept.dept_name}}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                {% if student_obj %}
+                                <button type="submit" class="btn btn-success">Save student</button>
+                                {% else %}
+                                <button type="submit" class="btn btn-success">Add student</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<a href="{% url 'dean_staff_office:student_catalogue'%}">Back to Student Catalogue</a>
+<br>
+<a href="{% url 'dean_staff_office:home'%}">Back to Home</a>
+</div>
+
+{% endblock %}
+
