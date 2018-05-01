@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'register',
     'studentportal',
     'facultyportal',
+
+    'dean_staff_office',
+
 ]
 
 MIDDLEWARE = [

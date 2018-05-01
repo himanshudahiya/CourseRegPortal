@@ -20,14 +20,31 @@
 
 <ul>
 {% for to_other_batch_objs in to_other_batch%}
-<li>{{to_other_batch_objs.course_id.course_id}}: {{to_other_batch_objs.course_id.title}} (LTP: {{to_other_batch_objs.course_id.credit_struct}}) (Slot: {{to_other_batch_objs.slot}})</li>
 
+<form action="{% url 'studentportal:add_course_other_batch'%}" method="post">
+	{% csrf_token %}
+	<li>{{to_other_batch_objs.course_id.course_id}}: {{to_other_batch_objs.course_id.title}} (LTP: {{to_other_batch_objs.course_id.credit_struct}}) (Slot: {{to_other_batch_objs.slot}})
+	<button type="submit" name="Add_Course" value="{{to_other_batch_objs.faculty_id.faculty_id}}+{{to_other_batch_objs.course_id.course_id}}+{{to_other_batch_objs.semester}}+{{to_other_batch_objs.year}}+{{to_other_batch_objs.slot}}">Add Course</button>
+	{%if error_message %}
+		<p style="color: red">{{error_message}}</p>
+	{%endif%}
+	</li>
+</form>
 {% endfor %}
 </ul>
 <h3>Registered courses</h3>
 <ul>
 {% for succ_reg_objs in successful_registered%}
-<li>{{succ_reg_objs.course_id.course_id}}: {{succ_reg_objs.course_id.title}} (LTP: {{succ_reg_objs.course_id.credit_struct}}) (Slot: {{succ_reg_objs.slot}})</li>
+
+<form action="{% url 'studentportal:delete_reg_course'%}" method="post">
+	{% csrf_token %}
+	<li>{{succ_reg_objs.course_id.course_id}}: {{succ_reg_objs.course_id.title}} (LTP: {{succ_reg_objs.course_id.credit_struct}}) (Slot: {{succ_reg_objs.slot}})
+	<button type="submit" name="Remove_Course" value="{{succ_reg_objs.faculty_id.faculty_id}}+{{succ_reg_objs.course_id.course_id}}+{{succ_reg_objs.semester}}+{{succ_reg_objs.year}}+{{succ_reg_objs.slot}}">Remove Course</button>
+	{%if error_message %}
+		<p style="color: red">{{error_message}}</p>
+	{%endif%}
+	</li>
+</form>
 
 {% endfor %}
 </ul>
@@ -36,8 +53,17 @@
 
 <ul>
 {% for tokened_objs in tokened%}
-<li>{{tokened_objs.course_id.course_id}}: {{tokened_objs.course_id.title}} (LTP: {{tokened_objs.course_id.credit_struct}}) (Slot: {{tokened_objs.slot}})</li>
+
+<form action="{% url 'studentportal:delete_tokened_course'%}" method="post">
+	{% csrf_token %}
+	<li>{{tokened_objs.course_id.course_id}}: {{tokened_objs.course_id.title}} (LTP: {{tokened_objs.course_id.credit_struct}}) (Slot: {{tokened_objs.slot}})
+	<button type="submit" name="Remove_Course" value="{{tokened_objs.faculty_id.faculty_id}}+{{tokened_objs.course_id.course_id}}+{{tokened_objs.semester}}+{{tokened_objs.year}}+{{tokened_objs.slot}}">Remove Course</button>
+	{%if error_message %}
+		<p style="color: red">{{error_message}}</p>
+	{%endif%}
+	</li>
+</form>
 
 {% endfor %}
 </ul>
-
+<a href="{% url 'studentportal:home' %}">Back To Home</a>

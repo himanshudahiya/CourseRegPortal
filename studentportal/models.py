@@ -2,10 +2,11 @@ from __future__ import unicode_literals
 from django import forms
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+import datetime
 # Create your models here.
-
+now = datetime.datetime.now()
 class department(models.Model):
-	dept_id=models.CharField(max_length=25,primary_key=True)
+	dept_id=models.IntegerField()
 	dept_name=models.CharField(max_length=25)
 	def __str__(self):
    		return self.dept_name
@@ -16,18 +17,19 @@ class batch(models.Model):
 	def __str__(self):
 		return self.dept.dept_name + " " + str(self.year)
 
+
 class student(models.Model):
 	student_id=models.CharField(max_length=25,primary_key=True)
 	name=models.CharField(max_length=40)
 	dept_id=models.ForeignKey(department,on_delete=models.CASCADE)
-	cgpa=models.DecimalField(decimal_places=2,max_digits=3)
-	curr_registered_credits=models.IntegerField()
-	max_credit=models.IntegerField()
-	total_credits=models.IntegerField()
-	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)])
-	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)])
-	password=models.CharField(max_length=12)
-	
+	cgpa=models.DecimalField(decimal_places=2,max_digits=3,default=0)
+	curr_registered_credits=models.IntegerField(default=0)
+	max_credit=models.IntegerField(default=24)
+	total_credits=models.IntegerField(default=0)
+	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)],default=1)
+	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)],default=1)
+	password=models.CharField(max_length=50,default="abcdefgh")
+	student_email=models.CharField(max_length=100, default="")	
 	def __str__(self):
    		return self.name
 
@@ -111,10 +113,11 @@ class teaches(models.Model):
 	slot=models.CharField(max_length=2)
 	min_cgpa_constraint=models.DecimalField(decimal_places=2,max_digits=3)
 	batch = models.ManyToManyField(batch)
+	prerequisite = models.ManyToManyField(course, related_name = "prerequisites")
 	class Meta:
 		unique_together=('faculty_id','course_id','semester','year','slot')
 	def __str__(self):
-   		return self.faculty_id.name + " " + self.course_id.course_id
+   		return self.course_id.title + " " + self.course_id.course_id
 
 class takes(models.Model):
 	student_obj=models.ForeignKey(student,on_delete=models.CASCADE)
@@ -135,13 +138,13 @@ class successfull_register(models.Model):
 class token(models.Model):
 	student_obj=models.ForeignKey(student,on_delete=models.CASCADE)
 	teaches=models.ForeignKey(teaches,on_delete=models.CASCADE)
-	status=models.TextField()
-
+	status=models.IntegerField()
+	reason=models.TextField(default = ":and:")
 
 	class Meta:
 		unique_together=('student_obj','teaches')
 	def __str__(self):
-   		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
+   		return self.student_obj.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
 class grades(models.Model):
 	student_id=models.ForeignKey(student,on_delete=models.CASCADE)
@@ -151,5 +154,6 @@ class grades(models.Model):
    		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
 
-
-
+class current(models.Model):
+	current_year = models.IntegerField(default=now.year)
+	current_sem = models.IntegerField(default=1)
