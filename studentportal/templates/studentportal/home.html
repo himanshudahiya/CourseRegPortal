@@ -20,7 +20,9 @@
 <h3>Max Credit(This semester): {{student_obj.max_credit}}</h3>
 <h3>Total Credits Passes: {{student_obj.total_credits}}</h3>
 <a href="{% url 'studentportal:view_grades'%}">View Grades</a>
+{% if crp_open %}
 <a href="{% url 'studentportal:register_courses'%}">Register Courses</a>
+{% endif %}
 <br>
 <br>
 <br>

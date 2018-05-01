@@ -1,28 +1,48 @@
-hello {{ faculty_id.name }}
+hello {{ faculty_obj.name }}
 
 <br>
 <h3>Your students this semester</h3>
 <ul>
-    {% for student_n in takes_obj %}    
-    <li>{{name}}: {{student_n.student_obj.name}} </li>  
-    Enter the grade
-    <form action="/facultyportal/update_grade/{{student_n.student_obj.student_id}}/{{student_n.teaches.course_id.course_id}}" method='post'>
-    	{% csrf_token %}
-   <select name="grade">
-   <option value="A">A</option>
-   <option value="B">B</option>
-   <option value="C">C</option>
-   <option value="D">D</option>
-   </select>
+    {% for student_n in student_grade_exist_list %}    
+    <li>{{student_n.student_id.name}} </li>  
+    {% if grade_update_open %}
+      Enter the grade
+      <form action="/facultyportal/update_grade/{{student_n.student_id.student_id}}/{{student_n.teaches.course_id.course_id}}" method='post'>
+      	{% csrf_token %}
+        <select name="grade">
+            {% for grade in grades_list %}
+            {% if student_n.grade == grade %}
+            <option value="{{student_n.grade}}" selected="selected">{{student_n.grade}}</option>
+            {% else %}
+            <option value="{{grade}}">{{grade}}</option>
+            {% endif %}
+           {% endfor %}
+        </select>
 
-  <input type="submit" value="update">
-</form>
+    <input type="submit" value="update">
+    </form>
+  {% endif %}
+  {% endfor %}
+{% for student_n in student_grade_not_exist_list %}    
+    <li>{{student_n.student_obj.name}} </li>  
+    {% if grade_update_open %}
+      Enter the grade
+      <form action="/facultyportal/update_grade/{{student_n.student_obj.student_id}}/{{student_n.teaches.course_id.course_id}}" method='post'>
+        {% csrf_token %}
+        <select name="grade">
+            {% for grade in grades_list %}
+                <option value="{{grade}}">{{grade}}</option>
+            {% endfor %}
+        </select>
 
-
-    {% endfor %}
+    <input type="submit" value="update">
+    </form>
+  {% endif %}
+  {% endfor %}
    
 </ul>
 
+<a href="{% url 'facultyportal:home'%}">Back to Home</a>
 
   
   
