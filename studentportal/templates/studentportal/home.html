@@ -3,10 +3,10 @@
 <h3>Your courses this semester</h3>
 <ul>
 	{% for courses in your_courses %}
-	{% if student_obj.current_sem == courses.semester%}
+	
 
 	<li>{{courses.course_id.course_id}}: {{courses.course_id.title}} (LTP: {{courses.course_id.credit_struct}}) (Slot: {{courses.slot}})</li>
-	{% endif %}
+	
 	{% endfor %}
 </ul>
 <h3>Department: {{student_obj.dept_id.dept_name}}</h3>

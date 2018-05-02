@@ -68,10 +68,15 @@ def home(request):
 		student_obj = student.objects.get(student_id = student_id)
 		takes_obj = takes.objects.filter(student_obj = student_obj)
 		your_courses = []
+		current_obj = current.objects.all()
+		for obj in current_obj:
+			current_year=obj.current_year
+			current_sem=obj.current_sem
 		for takes_t in takes_obj:
-			for batch in takes_t.teaches.batch.all():
-				if student_obj.current_year == batch.year:
-					your_courses.append(takes_t.teaches)
+			if takes_t.teaches.year==current_year and takes_t.teaches.semester==current_sem:
+				your_courses.append(takes_t.teaches)
+
+					
 				
 		portal_objs = portalsOpen.objects.all()
 		crp_open = False

@@ -408,6 +408,10 @@ def update_sem_year_form(request):
 		context ={'error_message':error_message, 'good_message':good_message}
 		error_message=''
 		good_message = ''
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
 
 
 def faculty_catalogue(request):
@@ -438,7 +442,52 @@ def update_sem_year(request):
 	
 		
 	if((updated_year == curr_year+1) or (updated_year==curr_year)):
-		print("yes")
+		for student_obj in student_objs:
+			prev_cgpa = student_obj.cgpa
+			prev_credit = student_obj.total_credits
+			current_obj = current.objects.all()
+			for obj in current_obj:
+				curr_year=obj.current_year
+				curr_sem=obj.current_sem
+			if(curr_sem == 1):
+				prev_sem = 2
+				prev_year = curr_year -1
+			elif(curr_sem == 2):
+				prev_sem = 1
+				prev_year = curr_year
+			course_stu_list = grades.objects.filter(student_id = student_obj)
+			sums = 0
+			add_credit = 0
+			prev_sem_credit=0
+			for c in course_stu_list:
+				if(int(c.grade)>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
+					course_obj = course.objects.get(course_id = c.teaches.course_id.course_id)
+					credit = course_obj.credit_struct
+					t_credit = 0
+					for d in credit:
+						t_credit=t_credit+int(d)
+					prev_sem_credit = prev_sem_credit+t_credit
+				elif(int(c.grade)>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
+					course_obj = course.objects.get(course_id = c.teaches.course_id.course_id)
+					credit = course_obj.credit_struct
+					t_credit = 0
+					for d in credit:
+						t_credit=t_credit+int(d)
+					add_credit = add_credit + t_credit
+					sums = sums + t_credit*int(c.grade)
+			sums = (sums + prev_cgpa*student_obj.total_credits)/(student_obj.total_credits+add_credit)
+			student_obj.total_credits = student_obj.total_credits+add_credit
+			student_obj.cgpa =  sums
+			div=2
+			if student_obj.current_year==1 and student_obj.current_sem==1:
+				div=1
+			student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/div
+			student_obj.curr_registered_credits=0
+			student_obj.save()
+
+
+
+
 		for stu in student_objs:
 			if(updated_year==curr_year+1):
 				y = stu.current_year
@@ -450,8 +499,13 @@ def update_sem_year(request):
 			curr.current_sem=updated_sem
 			curr.current_year= updated_year
 			curr.save()
+
 		global good_message
-		good_message = "Year and semester updated!!"
+
+
+		good_message = "Year,semester and  cgpa updated!!"
+
+
 		
 			
 	else:
@@ -461,7 +515,7 @@ def update_sem_year(request):
 		return redirect('/dean_staff_office/update_sem_year_form/')
 	
 	
-	return redirect('/dean_staff_office/update_sem_year_formd')
+	return redirect('/dean_staff_office/update_sem_year_form')
 
 	
 

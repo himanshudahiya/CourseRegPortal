@@ -53,52 +53,55 @@ def logout_user(request):
 		del request.session['faculty_id']
 	return redirect('/facultyportal/')
 
-
 def update_cgpa(request):
     if request.session.has_key('faculty_id'):
         student_all = student.objects.all()
 
         for student_obj in student_all:
-            prev_cgpa = student_obj.cgpa
-            prev_credit = student_obj.total_credits
-            curr_sem = student_obj.current_sem
-            curr_year = student_obj.current_year
-
-            if(curr_sem == 1):
-                prev_sem = 2
-                prev_year = curr_year -1
-            elif(curr_sem == 2):
-                prev_sem = 1
-                prev_year = curr_year
-
-            course_stu_list = grades.objects.filter(student_id = student_obj)
-            sums = 0
-            add_credit = 0
-            prev_sem_credit=0
-            for c in course_stu_list:
-
-                if(int(c.grade)>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
-                    course_obj = course.objects.get(course_id = c.teaches.course_id)
-                    credit = course_obj.credit_struct
-                    t_credit = 0
-                    for d in credit:
-                        t_credit=t_credit+int(d)
-                    prev_sem_credit = prev_sem_credit+t_credit
-
-                elif(int(c.grade)>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
-                    course_obj = course.objects.get(course_id = c.teaches.course_id)
-                    credit = course_obj.credit_struct
-                    t_credit = 0
-                    for d in credit:
-                        t_credit=t_credit+int(d)
-                    add_credit = add_credit + t_credit
-                    sums = sums + t_credit*c.grades
-                sums = (sums + prev_cgpa*prev_credit)/(prev_credit+add_credit)
-                student_obj.total_credits = prev_credit+add_credit
-                student_obj.cgpa =  sums
-                student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/2
-                student_obj.save()
+        	prev_cgpa = student_obj.cgpa
+        	prev_credit = student_obj.total_credits
+        	current_obj = current.objects.all()
+        	for obj in current_obj:
+        		curr_year=obj.current_year
+        		curr_sem=obj.current_sem
+        	if(curr_sem == 1):
+        		prev_sem = 2
+        		prev_year = curr_year -1
+        	elif(curr_sem == 2):
+        		prev_sem = 1
+        		prev_year = curr_year
+        	course_stu_list = grades.objects.filter(student_id = student_obj)
+        	sums = 0
+        	add_credit = 0
+        	prev_sem_credit=0
+        	for c in course_stu_list:
+        		if(int(c.grade)>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
+        			course_obj = course.objects.get(course_id = c.teaches.course_id.course_id)
+        			credit = course_obj.credit_struct
+        			t_credit = 0
+        			for d in credit:
+        				t_credit=t_credit+int(d)
+        			prev_sem_credit = prev_sem_credit+t_credit
+        		elif(int(c.grade)>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
+        			course_obj = course.objects.get(course_id = c.teaches.course_id.course_id)
+        			credit = course_obj.credit_struct
+        			t_credit = 0
+        			for d in credit:
+        				t_credit=t_credit+int(d)
+        			add_credit = add_credit + t_credit
+        			sums = sums + t_credit*int(c.grade)
+        	sums = (sums + prev_cgpa*student_obj.total_credits)/(student_obj.total_credits+add_credit)
+        	student_obj.total_credits = student_obj.total_credits+add_credit
+        	student_obj.cgpa =  sums
+        	div=2
+        	if student_obj.current_year==1 and student_obj.current_sem==1:
+        		div=1
+        	student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/div
+        	student_obj.save()
     return redirect('/facultyportal/home')
+
+
+
 
 
 def home(request):
