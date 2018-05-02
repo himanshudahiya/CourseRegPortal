@@ -20,6 +20,9 @@ urlpatterns=[
 	url('^student_edit_post/(?P<student_id_prev>[A-Za-z]*[0-9]+)', views.student_edit_post, name='student_edit_post'),
 	url('^update_sem_year_form' , views.update_sem_year_form , name = 'update_sem_year_form'),
 	url('^update_sem_year' , views.update_sem_year , name = 'update_sem_year'),
-
-
+	url('^faculty_catalogue/', views.faculty_catalogue, name='faculty_catalogue'),
+	url('^add_faculty', views.add_faculty, name='add_faculty'),
+	url('^faculty_post', views.faculty_post, name='faculty_post'),
+	url('^edit_faculty/(?P<faculty_id>[A-Za-z]*[0-9]+)', views.edit_faculty, name='edit_faculty'),
+	url('^faculty_edit_post/(?P<faculty_id_prev>[A-Za-z]*[0-9]+)', views.faculty_edit_post, name='faculty_edit_post'),
 ]

@@ -261,6 +261,7 @@ def student_edit_post(request, student_id_prev):
 
 
 
+
 def update_sem_year_form(request):
 	if request.session.has_key('staff_id'):
 		template = loader.get_template('dean_staff_office/update_sem_year_form.html')
@@ -269,9 +270,18 @@ def update_sem_year_form(request):
 		context ={'error_message':error_message, 'good_message':good_message}
 		error_message=''
 		good_message = ''
+
+
+def faculty_catalogue(request):
+	if request.session.has_key('staff_id'):
+		faculty_objs = faculty.objects.all()
+		template = loader.get_template('dean_staff_office/faculty_catalogue.html')
+		dept_objs = department.objects.all()
+		context = {'faculty_objs': faculty_objs, 'dept_objs': dept_objs}
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/dean_staff_office/')
+
 
 def update_sem_year(request):
 	updated_year = int(request.POST['year'])
@@ -319,25 +329,130 @@ def update_sem_year(request):
 
 
 
-# def calculate_cgpa(request,student_id):
-# 	student_obj = student.objects.get(student_id = student_id)
-# 	prev_cgpa = student_obj.prev_cgpa
-# 	prev_credit = student_obj.total_credits
 
-# 	course_stu_list = grades.objects.filter(student_id = student_id)
-# 	sums = 0
-# 	add_credit = 0
-# 	for c in course_stu_list:
 
-# 		if(c.grades>=4):
-# 			course_obj = course.objects.get(course_id = c.teaches.course_id)
-# 			credit = course_obj.credit_struct
-# 			t_credit = 0
-# 			for d in credit:
-# 				t_credit=t_credit+int(d)
-# 			add_credit = add_credit + t_credit
-# 			sums = sums + t_credit*c.grades
-# 		sums = (sums + prev_cgpa*prev_credit)/(prev_credit+add_credit)
-# 		student_obj.total_credits = prev_credit+add_credit
-# 		student_obj.cgpa =  sums
-# 		student_obj.save()
+def add_faculty(request):
+	if request.session.has_key('staff_id'):
+		template = loader.get_template('dean_staff_office/add_faculty.html')
+		dept_objs = department.objects.all()
+		global error_message
+		global good_message
+		context = {'dept_objs':dept_objs,'error_message':error_message, 'good_message':good_message}
+		error_message = ''
+		good_message = ''
+		return HttpResponse(template.render(context, request))
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def faculty_post(request):
+	if request.session.has_key('staff_id'):
+		if request.method == "POST":
+			faculty_id = request.POST['faculty_id']
+			faculty_name = request.POST['faculty_title']
+			faculty_dept = request.POST['faculty_dept']
+			dept_obj = department.objects.get(dept_id = faculty_dept)
+
+			if faculty.objects.filter(faculty_id = faculty_id).exists():
+				global error_message
+				error_message = "Faculty already exist!!"
+			else:
+				global good_message
+				good_message = "Faculty added! Add another faculty."
+				faculty_email = faculty_id+"@iitrpr.ac.in"
+				faculty_obj = faculty(faculty_id = faculty_id, name = faculty_name, dept_id = dept_obj, email_id = faculty_email)
+				faculty_obj.save()
+			return redirect('/dean_staff_office/add_faculty')
+		else:
+			return redirect('/dean_staff_office/')
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def edit_faculty(request, faculty_id):
+	if request.session.has_key('staff_id'):
+		faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+		dept_objs = department.objects.all()
+		global error_message
+		context = {'dept_objs':dept_objs, 'faculty_obj':faculty_obj, 'error_message': error_message}
+		error_message = ''
+		template = loader.get_template('dean_staff_office/add_faculty.html')
+		return HttpResponse(template.render(context, request))
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def faculty_edit_post(request, faculty_id_prev):
+	if request.session.has_key('staff_id'):
+		faculty_id = request.POST['faculty_id']
+		faculty_name = request.POST['faculty_title']
+		faculty_dept = request.POST['faculty_dept']
+		dept_obj = department.objects.get(dept_id = faculty_dept)
+		if faculty_id_prev == faculty_id:
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id_prev)
+			faculty_obj.name = faculty_name
+			faculty_obj.dept_id = dept_obj
+			faculty_obj.save()
+		elif faculty.objects.filter(faculty_id = faculty_id).exists():
+			global error_message
+			error_message = "faculty with id = " + faculty_id + " already exists"
+			return redirect('/dean_staff_office/edit_faculty/' + faculty_id_prev)
+		else:
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id_prev).delete()
+			faculty_email = faculty_id + "@iitrpr.ac.in"
+			faculty_obj_new = faculty(faculty_id=faculty_id, name=faculty_name, dept_id = dept_obj, email_id = faculty_email)
+			faculty_obj_new.save()
+		return redirect('/dean_staff_office/faculty_catalogue/')
+	else:
+		return redirect('/dean_staff_office/')
+
+
+
+
+def calculate_cgpa(request):
+	if request.session.has_key('staff_id'):
+		student_all = student.objects.all()
+
+		for student_obj in student_all:
+			prev_cgpa = student_obj.cgpa
+			prev_credit = student_obj.total_credits
+			curr_sem = student_obj.current_sem
+			curr_year = student_obj.current_year
+
+			if(curr_sem == 1):
+				prev_sem = 2
+				prev_year = curr_year -1
+			elif(curr_sem == 2):
+				prev_sem = 1
+				prev_year = curr_year
+
+			course_stu_list = grades.objects.filter(student_id = student_id)
+			sums = 0
+			add_credit = 0
+			prev_sem_credit=0
+			for c in course_stu_list:
+
+				if(c.grade>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
+					course_obj = course.objects.get(course_id = c.teaches.course_id)
+					credit = course_obj.credit_struct
+					t_credit = 0
+					for d in credit:
+						t_credit=t_credit+int(d)
+					prev_sem_credit = prev_sem_credit+t_credit
+
+				elif(c.grade>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
+					course_obj = course.objects.get(course_id = c.teaches.course_id)
+					credit = course_obj.credit_struct
+					t_credit = 0
+					for d in credit:
+						t_credit=t_credit+int(d)
+					add_credit = add_credit + t_credit
+					sums = sums + t_credit*c.grades
+				sums = (sums + prev_cgpa*prev_credit)/(prev_credit+add_credit)
+				student_obj.total_credits = prev_credit+add_credit
+				student_obj.cgpa =  sums
+				if(student_obj.year ==1 and student_obj.sem ==1):
+					prev_sem_credit=0
+				student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/2
+				student_obj.save()
+	return redirect('/dean_staff_office/home')

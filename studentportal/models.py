@@ -47,7 +47,7 @@ class faculty(models.Model):
 	faculty_id=models.CharField(max_length=25,primary_key=True)
 	name=models.CharField(max_length=40)
 	dept_id=models.ForeignKey(department,on_delete=models.CASCADE)
-	password=models.CharField(max_length=12)
+	password=models.CharField(max_length=12, default="abcdefgh")
 	email_id=models.EmailField()
 	def __str__(self):
    		return self.name
@@ -81,11 +81,10 @@ class hod(models.Model):
 
 
 class advisor(models.Model):
-	year=models.IntegerField()
-	batch=models.CharField(max_length=25)
+	batch=models.ForeignKey(batch,on_delete=models.CASCADE)
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
-		unique_together=('faculty_id','year')
+		unique_together=('faculty_id','batch')
 	def __str__(self):
    		return self.faculty_id.name
 
@@ -109,7 +108,7 @@ class teaches(models.Model):
 	slot=models.CharField(max_length=2)
 	min_cgpa_constraint=models.DecimalField(decimal_places=2,max_digits=3)
 	batch = models.ManyToManyField(batch)
-	prerequisite = models.ManyToManyField(course, related_name = "prerequisites")
+	prerequisite = models.ManyToManyField(course, related_name = "prerequisites", null=True, blank=True)
 	class Meta:
 		unique_together=('faculty_id','course_id','semester','year','slot')
 	def __str__(self):
@@ -134,7 +133,7 @@ class successfull_register(models.Model):
 class token(models.Model):
 	student_obj=models.ForeignKey(student,on_delete=models.CASCADE)
 	teaches=models.ForeignKey(teaches,on_delete=models.CASCADE)
-	status=models.IntegerField()
+	status=models.IntegerField(default=1)
 	reason=models.TextField(default = ":and:")
 
 	class Meta:
@@ -153,3 +152,11 @@ class grades(models.Model):
 class current(models.Model):
 	current_year = models.IntegerField(default=now.year)
 	current_sem = models.IntegerField(default=1)
+	def __str__(self):
+		return str(self.current_year) + " " + str(self.current_sem)
+
+class portalsOpen(models.Model):
+	crp_open = models.BooleanField(default=False)
+	grade_update_open = models.BooleanField(default=False)
+	def __str__(self):
+		return str(self.crp_open) +" " +str(self.grade_update_open)
