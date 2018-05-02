@@ -33,10 +33,6 @@ class student(models.Model):
 	def __str__(self):
    		return self.name
 
-class current(models.Model):
-	current_year=models.IntegerField()
-	current_sem=models.IntegerField()
-
 
 class course(models.Model):
 	course_id=models.CharField(max_length=25,primary_key=True)
@@ -51,7 +47,7 @@ class faculty(models.Model):
 	faculty_id=models.CharField(max_length=25,primary_key=True)
 	name=models.CharField(max_length=40)
 	dept_id=models.ForeignKey(department,on_delete=models.CASCADE)
-	password=models.CharField(max_length=12)
+	password=models.CharField(max_length=12, default="abcdefgh")
 	email_id=models.EmailField()
 	def __str__(self):
    		return self.name
@@ -113,7 +109,7 @@ class teaches(models.Model):
 	slot=models.CharField(max_length=2)
 	min_cgpa_constraint=models.DecimalField(decimal_places=2,max_digits=3)
 	batch = models.ManyToManyField(batch)
-	prerequisite = models.ManyToManyField(course, related_name = "prerequisites")
+	prerequisite = models.ManyToManyField(course, related_name = "prerequisites", null=True, blank=True)
 	class Meta:
 		unique_together=('faculty_id','course_id','semester','year','slot')
 	def __str__(self):
@@ -153,3 +149,18 @@ class grades(models.Model):
 	def __str__(self):
    		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
+<<<<<<< HEAD
+=======
+
+class current(models.Model):
+	current_year = models.IntegerField(default=now.year)
+	current_sem = models.IntegerField(default=1)
+	def __str__(self):
+		return str(self.current_year) + " " + str(self.current_sem)
+
+class portalsOpen(models.Model):
+	crp_open = models.BooleanField(default=False)
+	grade_update_open = models.BooleanField(default=False)
+	def __str__(self):
+		return str(self.crp_open) +" " +str(self.grade_update_open)
+>>>>>>> ab407c8080b0c545ea56e0223813f3d042a3985a

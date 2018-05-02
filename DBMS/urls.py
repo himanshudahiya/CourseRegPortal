@@ -21,7 +21,11 @@ urlpatterns = [
     url('^register/', include('register.urls')),
     url('^studentportal/', include('studentportal.urls')),
     url('^facultyportal/', include('facultyportal.urls')),
+<<<<<<< HEAD
 
     url('^dean_staff_office/',include('dean_staff_office.urls'))
 
+=======
+    url('^dean_staff_office/',include('dean_staff_office.urls'))
+>>>>>>> ab407c8080b0c545ea56e0223813f3d042a3985a
 ]

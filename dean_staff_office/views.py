@@ -373,3 +373,92 @@ def student_edit_post(request, student_id_prev):
 		return redirect('/dean_staff_office/student_catalogue/')
 	else:
 		return redirect('/dean_staff_office/')
+
+
+
+
+def faculty_catalogue(request):
+	if request.session.has_key('staff_id'):
+		faculty_objs = faculty.objects.all()
+		template = loader.get_template('dean_staff_office/faculty_catalogue.html')
+		dept_objs = department.objects.all()
+		context = {'faculty_objs': faculty_objs, 'dept_objs': dept_objs}
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def add_faculty(request):
+	if request.session.has_key('staff_id'):
+		template = loader.get_template('dean_staff_office/add_faculty.html')
+		dept_objs = department.objects.all()
+		global error_message
+		global good_message
+		context = {'dept_objs':dept_objs,'error_message':error_message, 'good_message':good_message}
+		error_message = ''
+		good_message = ''
+		return HttpResponse(template.render(context, request))
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def faculty_post(request):
+	if request.session.has_key('staff_id'):
+		if request.method == "POST":
+			faculty_id = request.POST['faculty_id']
+			faculty_name = request.POST['faculty_title']
+			faculty_dept = request.POST['faculty_dept']
+			dept_obj = department.objects.get(dept_id = faculty_dept)
+
+			if faculty.objects.filter(faculty_id = faculty_id).exists():
+				global error_message
+				error_message = "Faculty already exist!!"
+			else:
+				global good_message
+				good_message = "Faculty added! Add another faculty."
+				faculty_email = faculty_id+"@iitrpr.ac.in"
+				faculty_obj = faculty(faculty_id = faculty_id, name = faculty_name, dept_id = dept_obj, email_id = faculty_email)
+				faculty_obj.save()
+			return redirect('/dean_staff_office/add_faculty')
+		else:
+			return redirect('/dean_staff_office/')
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def edit_faculty(request, faculty_id):
+	if request.session.has_key('staff_id'):
+		faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+		dept_objs = department.objects.all()
+		global error_message
+		context = {'dept_objs':dept_objs, 'faculty_obj':faculty_obj, 'error_message': error_message}
+		error_message = ''
+		template = loader.get_template('dean_staff_office/add_faculty.html')
+		return HttpResponse(template.render(context, request))
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def faculty_edit_post(request, faculty_id_prev):
+	if request.session.has_key('staff_id'):
+		faculty_id = request.POST['faculty_id']
+		faculty_name = request.POST['faculty_title']
+		faculty_dept = request.POST['faculty_dept']
+		dept_obj = department.objects.get(dept_id = faculty_dept)
+		if faculty_id_prev == faculty_id:
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id_prev)
+			faculty_obj.name = faculty_name
+			faculty_obj.dept_id = dept_obj
+			faculty_obj.save()
+		elif faculty.objects.filter(faculty_id = faculty_id).exists():
+			global error_message
+			error_message = "faculty with id = " + faculty_id + " already exists"
+			return redirect('/dean_staff_office/edit_faculty/' + faculty_id_prev)
+		else:
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id_prev).delete()
+			faculty_email = faculty_id + "@iitrpr.ac.in"
+			faculty_obj_new = faculty(faculty_id=faculty_id, name=faculty_name, dept_id = dept_obj, email_id = faculty_email)
+			faculty_obj_new.save()
+		return redirect('/dean_staff_office/faculty_catalogue/')
+	else:
+		return redirect('/dean_staff_office/')

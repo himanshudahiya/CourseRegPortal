@@ -12,5 +12,14 @@ urlpatterns = [
 	url('^grade/(?P<course_id>[A-Za-z0-9]+)', views.grade, name='grade'),
 	url('^update_grade/(?P<student_id>[A-Za-z0-9]+)/(?P<course_id>[A-Za-z0-9]+)', views.update_grade, name='update_grade'),
 	url('^add_course_float', views.add_course_float, name='add_course_float'),
+<<<<<<< HEAD
 	url('^float_new_courses', views.float_new_courses, name='float_new_courses')
 	]
+=======
+	url('^float_new_courses', views.float_new_courses, name='float_new_courses'),
+	url('^view_tokens', views.view_tokens, name='view_tokens'),
+	url('^accept_close', views.accept_close, name='accept_close'),
+	url('^reject_close', views.reject_close, name='reject_close'),
+	url('^accept_pass', views.accept_pass, name='accept_pass'),
+	]
+>>>>>>> ab407c8080b0c545ea56e0223813f3d042a3985a

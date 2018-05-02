@@ -1,0 +1,32 @@
+<br>
+<h3>Your tokens this semester</h3>
+<ul>
+    {% for tokens in teaches_course_tokens %}
+    
+    <li>
+    	<div>
+    		<p>Student Name: {{tokens.student_obj.name}}<br>
+    		Course ID: {{tokens.teaches.course_id.course_id}}<br>
+    		Course Name: {{tokens.teaches.course_id.title}}<br>
+    		Course LTP Structure: {{tokens.teaches.course_id.credit_struct}}<br>
+    		Course Slot: {{tokens.teaches.slot}}<br>
+    		Token Reason: {{tokens.reason}}</p>
+            <form method="post" action="{% url 'facultyportal:accept_close' %}">
+        {% csrf_token %}
+    		<button type="submit" name="accept_close" value="{{tokens.student_obj.student_id}}+{{tokens.teaches.course_id.course_id}}+{{tokens.teaches.semester}}+{{tokens.teaches.year}}">Accept &amp; Close</button>
+        </form>
+        <form method="post" action="{% url 'facultyportal:reject_close' %}">
+        {% csrf_token %}
+            <button type="submit" name="reject_close" value="{{tokens.student_obj.student_id}}+{{tokens.teaches.course_id.course_id}}+{{tokens.teaches.semester}}+{{tokens.teaches.year}}">Reject</button>
+        </form>
+        <form method="post" action="{% url 'facultyportal:accept_pass' %}">
+        {% csrf_token %}
+            <button type="submit" name="accept_pass" value="{{tokens.student_obj.student_id}}+{{tokens.teaches.course_id.course_id}}+{{tokens.teaches.semester}}+{{tokens.teaches.year}}">Accept &amp; Pass</button>
+        </form>
+    	</div>
+    </li>
+    </form>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'facultyportal:home'%}">Back to Home</a> 
