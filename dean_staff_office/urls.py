@@ -25,4 +25,5 @@ urlpatterns=[
 	url('^faculty_post', views.faculty_post, name='faculty_post'),
 	url('^edit_faculty/(?P<faculty_id>[A-Za-z]*[0-9]+)', views.edit_faculty, name='edit_faculty'),
 	url('^faculty_edit_post/(?P<faculty_id_prev>[A-Za-z]*[0-9]+)', views.faculty_edit_post, name='faculty_edit_post'),
+	url('^portal_opn_close/', views.portal_opn_close, name='portal_opn_close'),
 ]

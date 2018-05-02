@@ -270,6 +270,9 @@ def update_sem_year_form(request):
 		context ={'error_message':error_message, 'good_message':good_message}
 		error_message=''
 		good_message = ''
+		return HttpResponse(template.render(context, request))
+	else:
+		redirect('/dean_staff_office/')
 
 
 def faculty_catalogue(request):
@@ -407,7 +410,8 @@ def faculty_edit_post(request, faculty_id_prev):
 		return redirect('/dean_staff_office/')
 
 
-
+def portal_open_close(request):
+	print("324sdfa")
 
 def calculate_cgpa(request):
 	if request.session.has_key('staff_id'):
