@@ -258,3 +258,86 @@ def student_edit_post(request, student_id_prev):
 		return redirect('/dean_staff_office/student_catalogue/')
 	else:
 		return redirect('/dean_staff_office/')
+
+
+
+def update_sem_year_form(request):
+	if request.session.has_key('staff_id'):
+		template = loader.get_template('dean_staff_office/update_sem_year_form.html')
+		global error_message
+		global good_message
+		context ={'error_message':error_message, 'good_message':good_message}
+		error_message=''
+		good_message = ''
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def update_sem_year(request):
+	updated_year = int(request.POST['year'])
+	updated_sem = int(request.POST['sem'])
+
+	current_objs = current.objects.all()
+	curr_year=0
+	for curr in current_objs:
+		curr_year = curr.current_year
+
+
+	student_objs = student.objects.all()
+
+	print(curr_year)
+	print(updated_year)
+	
+		
+	if((updated_year == curr_year+1) or (updated_year==curr_year)):
+		print("yes")
+		for stu in student_objs:
+			if(updated_year==curr_year+1):
+				y = stu.current_year
+				stu.current_year = y+1
+			stu.current_sem = updated_sem
+			stu.save()
+
+		for curr in current_objs:
+			curr.current_sem=updated_sem
+			curr.current_year= updated_year
+			curr.save()
+		global good_message
+		good_message = "Year and semester updated!!"
+		
+			
+	else:
+		print("no")
+		global error_message
+		error_message = "Update only by 1 year!!!"
+		return redirect('/dean_staff_office/update_sem_year_form/')
+	
+	
+	return redirect('/dean_staff_office/update_sem_year_formd')
+
+	
+
+
+
+# def calculate_cgpa(request,student_id):
+# 	student_obj = student.objects.get(student_id = student_id)
+# 	prev_cgpa = student_obj.prev_cgpa
+# 	prev_credit = student_obj.total_credits
+
+# 	course_stu_list = grades.objects.filter(student_id = student_id)
+# 	sums = 0
+# 	add_credit = 0
+# 	for c in course_stu_list:
+
+# 		if(c.grades>=4):
+# 			course_obj = course.objects.get(course_id = c.teaches.course_id)
+# 			credit = course_obj.credit_struct
+# 			t_credit = 0
+# 			for d in credit:
+# 				t_credit=t_credit+int(d)
+# 			add_credit = add_credit + t_credit
+# 			sums = sums + t_credit*c.grades
+# 		sums = (sums + prev_cgpa*prev_credit)/(prev_credit+add_credit)
+# 		student_obj.total_credits = prev_credit+add_credit
+# 		student_obj.cgpa =  sums
+# 		student_obj.save()

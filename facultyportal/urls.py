@@ -13,3 +13,4 @@ urlpatterns = [
 	url('^update_grade/(?P<student_id>[A-Za-z0-9]+)/(?P<course_id>[A-Za-z0-9]+)', views.update_grade, name='update_grade'),
 	url('^add_course_float', views.add_course_float, name='add_course_float'),
 	url('^float_new_courses', views.float_new_courses, name='float_new_courses')
+]

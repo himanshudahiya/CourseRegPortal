@@ -33,10 +33,6 @@ class student(models.Model):
 	def __str__(self):
    		return self.name
 
-class current(models.Model):
-	current_year=models.IntegerField()
-	current_sem=models.IntegerField()
-
 
 class course(models.Model):
 	course_id=models.CharField(max_length=25,primary_key=True)
