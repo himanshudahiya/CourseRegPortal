@@ -67,15 +67,18 @@ def home(request):
 		template = loader.get_template('studentportal/home.html')
 		student_obj = student.objects.get(student_id = student_id)
 		takes_obj = takes.objects.filter(student_obj = student_obj)
-		years = []
+		your_courses = []
 		for takes_t in takes_obj:
 			for batch in takes_t.teaches.batch.all():
-				years.append(batch.year)
+				if student_obj.current_year == batch.year:
+					your_courses.append(takes_t.teaches)
+				
 		portal_objs = portalsOpen.objects.all()
 		crp_open = False
 		for portal_obj in portal_objs:
 			crp_open = portal_obj.crp_open
-		context = {'student_obj':student_obj,'takes_obj':takes_obj, 'years': years, 'crp_open':crp_open}
+		
+		context = {'student_obj':student_obj,'your_courses':your_courses, 'crp_open':crp_open}
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/studentportal/')
@@ -110,9 +113,25 @@ def register_courses(request):
 
 			to_your_batch = []
 			to_other_batch = []
-			teaches_objs = teaches.objects.filter(year = current_year, semester = student_obj.current_sem)
+			teaches_objs_old = teaches.objects.filter(year = current_year, semester = student_obj.current_sem)
+			teaches_objs = []
+			takes_obj = takes.objects.filter(student_obj = student_obj)
+			your_courses = []
+			for takes_t in takes_obj:
+				for batch in takes_t.teaches.batch.all():
+					if student_obj.current_year == batch.year:
+						your_courses.append(takes_t.teaches)
+			
+			for teaches_obj_old in teaches_objs_old:
+				teaches_objs.append(teaches_obj_old)
 
-
+			for your_courses_tt in your_courses:
+				print(teaches_objs, your_courses_tt)
+				if your_courses_tt not in teaches_objs:
+					teaches_objs.append(your_courses_tt)
+				elif your_courses_tt in teaches_objs:
+					teaches_objs.remove(your_courses_tt)
+			
 			for teaches_t in teaches_objs:
 				for batch_t in teaches_t.batch.all():
 					if batch_t.dept == student_obj.dept_id and batch_t.year == student_obj.current_year:
@@ -383,3 +402,6 @@ def delete_tokened_course(request):
 		return redirect('studentportal:register_courses')
 	else:
 		return redirect('/studentportal/')
+
+
+		

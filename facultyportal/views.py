@@ -233,3 +233,101 @@ def add_course_float(request):
 		return redirect('/facultyportal/home/')
 	else:
 		return redirect('/facultyportal/')
+
+
+def view_tokens(request):
+	if request.session.has_key('faculty_id'):
+		faculty_id = request.session['faculty_id']
+		faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+		current_objs = current.objects.all()
+		for current_obj in current_objs:
+			current_year = current_obj.current_year
+			current_sem = current_obj.current_sem
+		teaches_course_tokens = []
+		teaches_obj = teaches.objects.filter(faculty_id = faculty_obj, year = current_year, semester = current_sem)
+		for teaches_tt in teaches_obj:
+			teaches_courses = token.objects.filter(teaches = teaches_tt,status = 1)
+			for teaches_course in teaches_courses:
+				teaches_course_tokens.append(teaches_course)
+
+		template = loader.get_template('facultyportal/token.html')
+		context = {'teaches_course_tokens': teaches_course_tokens}
+		return HttpResponse(template.render(context,request))
+
+	else:
+		return redirect('/facultyportal/')
+
+
+def accept_close(request):
+	if request.session.has_key('faculty_id'):
+		if request.method =="POST":
+			request_value = request.POST['accept_close']
+			request_value_att = request_value.split('+')
+			student_id = request_value_att[0]
+			course_id = request_value_att[1]
+			semester = int(request_value_att[2])
+			year = int(request_value_att[3])
+			student_obj = student.objects.get(student_id = student_id)
+			course_obj = course.objects.get(course_id = course_id)
+			faculty_id = request.session['faculty_id']
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+			teaches_obj = teaches.objects.get(faculty_id = faculty_obj, course_id = course_obj, semester = semester, year = year)
+			token_obj = token.objects.get(student_obj = student_obj, teaches = teaches_obj).delete()
+			takes_obj = takes(student_obj = student_obj, teaches = teaches_obj)
+			takes_obj.save()
+			course_credit = 0
+			n = int(course_obj.credit_struct)
+			while n:
+				course_credit, n = course_credit + n % 10, n // 10
+			student_obj.curr_registered_credits = student_obj.curr_registered_credits + course_credit
+			student_obj.save()
+			return redirect('/facultyportal/view_tokens/')
+		else:
+			return redirect('/facultyportal/')
+	else:
+		return redirect('/facultyportal/')
+
+def reject_close(request):
+	if request.session.has_key('faculty_id'):
+		if request.method =="POST":
+			request_value = request.POST['reject_close']
+			request_value_att = request_value.split('+')
+			student_id = request_value_att[0]
+			course_id = request_value_att[1]
+			semester = int(request_value_att[2])
+			year = int(request_value_att[3])
+			student_obj = student.objects.get(student_id = student_id)
+			course_obj = course.objects.get(course_id = course_id)
+			faculty_id = request.session['faculty_id']
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+			teaches_obj = teaches.objects.get(faculty_id = faculty_obj, course_id = course_obj, semester = semester, year = year)
+			token_obj = token.objects.get(student_obj = student_obj, teaches = teaches_obj).delete()
+			return redirect('/facultyportal/view_tokens/')
+		else:
+			return redirect('/facultyportal/')
+	else:
+		return redirect('/facultyportal/')
+
+
+def accept_pass(request):
+	if request.session.has_key('faculty_id'):
+		if request.method =="POST":
+			request_value = request.POST['accept_pass']
+			request_value_att = request_value.split('+')
+			student_id = request_value_att[0]
+			course_id = request_value_att[1]
+			semester = int(request_value_att[2])
+			year = int(request_value_att[3])
+			student_obj = student.objects.get(student_id = student_id)
+			course_obj = course.objects.get(course_id = course_id)
+			faculty_id = request.session['faculty_id']
+			faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+			teaches_obj = teaches.objects.get(faculty_id = faculty_obj, course_id = course_obj, semester = semester, year = year)
+			token_obj = token.objects.get(student_obj = student_obj, teaches = teaches_obj)
+			token_obj.status = token_obj.status + 1
+			token_obj.save()
+			return redirect('/facultyportal/view_tokens/')
+		else:
+			return redirect('/facultyportal/')
+	else:
+		return redirect('/facultyportal/')

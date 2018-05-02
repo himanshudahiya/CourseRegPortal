@@ -2,13 +2,10 @@
 
 <h3>Your courses this semester</h3>
 <ul>
-	{% for takes in takes_obj %}
-	{% if student_obj.current_sem == takes.teaches.semester%}
-	{% for year in years%}
-	{% if year == student_obj.current_year %}
-	<li>{{takes.teaches.course_id.course_id}}: {{takes.teaches.course_id.title}} (LTP: {{takes.teaches.course_id.credit_struct}}) (Slot: {{takes.teaches.slot}})</li>
-	{% endif%}
-	{% endfor %}
+	{% for courses in your_courses %}
+	{% if student_obj.current_sem == courses.semester%}
+
+	<li>{{courses.course_id.course_id}}: {{courses.course_id.title}} (LTP: {{courses.course_id.credit_struct}}) (Slot: {{courses.slot}})</li>
 	{% endif %}
 	{% endfor %}
 </ul>
