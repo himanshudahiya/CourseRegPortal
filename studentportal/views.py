@@ -178,6 +178,7 @@ def register_courses(request):
 
 
 def add_course_batch(request):
+	global error_message
 
 	if request.session.has_key('student_id'):
 		selected_course = request.POST['Add_Course']
@@ -222,7 +223,7 @@ def add_course_batch(request):
 
 		if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 			token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "CGPA not satisfied")
-			global error_message
+			
 			error_message = ''
 			course_tokened = True
 		
@@ -236,7 +237,7 @@ def add_course_batch(request):
 				token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 			else:
 				token_tttt.reason = token_tttt.reason + " :and: " + "Credit limit not satisfied"
-			global error_message
+			
 			error_message = ''
 			token_tttt.save()
 			course_tokened = True
@@ -279,7 +280,7 @@ def add_course_batch(request):
 			registered_courses_ttt.save()
 			student_obj.curr_registered_credits = student_obj.curr_registered_credits + course_credit
 			student_obj.save()
-			global error_message
+			
 			error_message = ''
 			return redirect('studentportal:register_courses')
 
@@ -288,61 +289,7 @@ def add_course_batch(request):
 		return redirect('/studentportal/')
 
 def add_course_other_batch(request):
-<<<<<<< HEAD
 	global error_message
-	selected_course = request.POST['Add_Course']
-	student_id=request.session['student_id']
-	course_attr = selected_course.split('+')
-	faculty_id = (course_attr[0])
-	course_id = (course_attr[1])
-	semester = int(course_attr[2])
-	year = int(course_attr[3])
-	slot = str(course_attr[4])
-	student_obj = student.objects.get(student_id = student_id)
-	faculty_id_obj = faculty.objects.get(faculty_id = faculty_id)
-	course_id_obj = course.objects.get(course_id = course_id)
-	selected_course_obj = teaches.objects.get(faculty_id = faculty_id_obj, course_id = course_id_obj, semester = semester, year = year, slot = slot)
-	# cgpa constraint
-	takes_obj = takes.objects.filter(student_obj = student_obj)
-	years = []
-	for takes_t in takes_obj:
-		for batch in takes_t.teaches.batch.all():
-			years.append(batch.year)
-
-	taken_this_year = []
-	for takes_t in takes_obj:
-		if student_obj.current_sem == takes_t.teaches.semester:
-			for year in years:
-				if year == student_obj.current_year:
-					taken_this_year.append(takes_t)
-
-	same_slot_courses = []
-	for teaches_t in taken_this_year:
-		if teaches_t.teaches.slot == slot:
-			same_slot_courses.append(teaches_t)
-	#same slot
-	if len(same_slot_courses) > 0:
-		global error_message
-		error_message = 'You have a course registered in same slot.'
-		print(error_message)
-		return redirect('studentportal:register_courses')
-	token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Student is of other batch")
-	if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
-		token_tttt.reason = "CGPA not satisfied" + " :and: " + token_tttt.reason 
-		
-		error_message = ''
-	
-	course_credit = 0
-	n = int(selected_course_obj.course_id.credit_struct)
-	while n:
-		course_credit, n = course_credit + n % 10, n // 10
-	# credit limit
-	if student_obj.curr_registered_credits + course_credit > student_obj.max_credit:
-		# token_tttt.reason = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
-		token_tttt.reason = "Credit limit not satisfied" +  " :and: " + token_tttt.reason 
-		
-		error_message = ''
-=======
 	if request.session.has_key('student_id'):
 		selected_course = request.POST['Add_Course']
 		student_id=request.session['student_id']
@@ -362,7 +309,7 @@ def add_course_other_batch(request):
 		for takes_t in takes_obj:
 			for batch in takes_t.teaches.batch.all():
 				years.append(batch.year)
->>>>>>> ab407c8080b0c545ea56e0223813f3d042a3985a
+
 
 		taken_this_year = []
 		for takes_t in takes_obj:
@@ -384,7 +331,7 @@ def add_course_other_batch(request):
 		token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Student is of other batch")
 		if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 			token_tttt.reason = "CGPA not satisfied" + " :and: " + token_tttt.reason 
-			global error_message
+			
 			error_message = ''
 		
 		course_credit = 0
@@ -395,14 +342,10 @@ def add_course_other_batch(request):
 		if student_obj.curr_registered_credits + course_credit > student_obj.max_credit:
 			# token_tttt.reason = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 			token_tttt.reason = "Credit limit not satisfied" +  " :and: " + token_tttt.reason 
-			global error_message
+			
 			error_message = ''
 
-<<<<<<< HEAD
-	if student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
-		
-		error_message = ''
-=======
+
 		prerequistes_list = selected_course_obj.prerequisite.all()
 		for prerequisite_tt in prerequistes_list:
 			if teaches.objects.filter(course_id = prerequisite_tt.course_id).exists():
@@ -420,18 +363,19 @@ def add_course_other_batch(request):
 				token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
 				
 		if student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
-			global error_message
+			
 			error_message = ''
 			token_tttt.save()
 			return redirect('studentportal:register_courses')
 		
->>>>>>> ab407c8080b0c545ea56e0223813f3d042a3985a
+
 		token_tttt.save()
 		return redirect('studentportal:register_courses')
 	else:
 		return redirect('/studentportal/')
 
 def delete_reg_course(request):
+	global error_message
 	if request.session.has_key('student_id'):
 		selected_course = request.POST['Remove_Course']
 		student_id=request.session['student_id']

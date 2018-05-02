@@ -26,7 +26,13 @@ def add_hod(request):
 	context = {}
 	faculty_obj=faculty.objects.all()
 	departments=department.objects.all()
-	context = {'faculty_obj':faculty_obj,'departments':departments}
+	global error_message
+	
+	global good_message
+	
+	context = {'faculty_obj':faculty_obj,'departments':departments,'error_message':error_message,'good_message':good_message}
+	error_message=''
+	good_message=''
 	print(faculty_obj)
 	if request.session.has_key('staff_id'):
 		return HttpResponse(template.render(context,request))
@@ -35,37 +41,33 @@ def add_hod(request):
 
 def hod_db(request):
 	global error_message
-	error_message=''
+	
+	global good_message
 	
 	if request.session.has_key('staff_id'):
-		
-
 		faculty_id=request.POST['faculty']
 		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
-		print(faculty_obj)
 		dept=faculty_obj.dept_id
-		hod_obj=hod.objects.filter(dateto=None)
-		if hod_obj.exists:
-			for hods in hod_obj:
-				if hods.faculty_obj.dept_id  is dept:
-					hods.faculty_obj.dateto=datetime.datetime.now()
+		dept_form=request.POST['dept']
+		dept_form_obj=department.objects.get(dept_id=dept_form)
 
+		if dept != dept_form_obj:
+			error_message='Not of same department'
+			return redirect('/dean_staff_office/add_hod')
 		
 
-
-
-
-		
-		
-		hod_obj = hod(faculty_id=faculty_obj,datefrom=datetime.datetime.now())
-		hod_obj.save()
+		else:
+			hod_obj=hod.objects.all()
+			if hod_obj is not None:
+				for hods in hod_obj:
+					if hods.faculty_id.dept_id  == dept:
+						hods.delete()
+			good_message='Added succesfully'
+			hod_obj = hod(faculty_id=faculty_obj,datefrom=datetime.datetime.now(),dateto=datetime.datetime.now())
+			hod_obj.save()
 		return redirect('/dean_staff_office/add_hod')
-
-
-		
-
-
-
+					
+					
 		
 	else:
 		return redirect('/dean_staff_office/')
@@ -76,7 +78,13 @@ def add_advisor(request):
 	context = {}
 	faculty_obj=faculty.objects.all()
 	batch_obj=batch.objects.all()
-	context = {'faculty_obj':faculty_obj,'batch_obj':batch_obj}
+	global error_message
+	
+	global good_message
+	
+	context = {'faculty_obj':faculty_obj,'batch_obj':batch_obj,'error_message':error_message,'good_message':good_message}
+	error_message=''
+	good_message=''
 	print(faculty_obj)
 	if request.session.has_key('staff_id'):
 		return HttpResponse(template.render(context,request))
@@ -84,6 +92,10 @@ def add_advisor(request):
 		return redirect('/dean_staff_office/')
 
 def advisor_db(request):
+	global error_message
+	
+	global good_message
+	
 	
 	if request.session.has_key('staff_id'):
 		
@@ -95,14 +107,25 @@ def advisor_db(request):
 		year=int(batch_attr[0])
 		print(year)
 		dept_id=int(batch_attr[1])
+		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
 		dept_obj=department.objects.get(dept_id=dept_id)
 		batch_add=batch.objects.get(year=year,dept=dept_obj)
 
-		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
-		
-		advisor_obj = advisor(faculty_id=faculty_obj,batch=batch_add)
-		advisor_obj.save()
+
+		if(dept_obj !=faculty_obj.dept_id):
+			error_message='Not of same department'
+		else:
+			advisor_obj=advisor.objects.filter(batch=batch_add)
+			if advisor_obj is not None:
+				advisor_obj.delete()
+			good_message='Added succesfully'
+			advisor_obj = advisor(faculty_id=faculty_obj,batch=batch_add)
+			advisor_obj.save()
 		return redirect('/dean_staff_office/add_advisor')
+			
+		
+		
+		
 	else:
 		return redirect('/dean_staff_office/')
 

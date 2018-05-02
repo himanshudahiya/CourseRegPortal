@@ -71,7 +71,7 @@ class dean(models.Model):
 
 
 class hod(models.Model):
-	dateto=models.DateField(default='')
+	dateto=models.DateField()
 	datefrom=models.DateField()
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
@@ -149,8 +149,6 @@ class grades(models.Model):
 	def __str__(self):
    		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
-<<<<<<< HEAD
-=======
 
 class current(models.Model):
 	current_year = models.IntegerField(default=now.year)
@@ -161,6 +159,6 @@ class current(models.Model):
 class portalsOpen(models.Model):
 	crp_open = models.BooleanField(default=False)
 	grade_update_open = models.BooleanField(default=False)
+	# crp_close=models.BooleanField(default=False)
 	def __str__(self):
 		return str(self.crp_open) +" " +str(self.grade_update_open)
->>>>>>> ab407c8080b0c545ea56e0223813f3d042a3985a
