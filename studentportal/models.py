@@ -22,10 +22,10 @@ class student(models.Model):
 	student_id=models.CharField(max_length=25,primary_key=True)
 	name=models.CharField(max_length=40)
 	dept_id=models.ForeignKey(department,on_delete=models.CASCADE)
-	cgpa=models.DecimalField(decimal_places=2,max_digits=3,default=0)
+	cgpa=models.DecimalField(decimal_places=2,max_digits=10,default=0)
 	curr_registered_credits=models.IntegerField(default=0)
-	max_credit=models.IntegerField(default=24)
-	total_credits=models.IntegerField(default=0)
+	max_credit=models.DecimalField(default=24, max_digits=10, decimal_places=2)
+	total_credits=models.DecimalField(default=0, max_digits=10, decimal_places=2)
 	current_year=models.IntegerField(validators=[MaxValueValidator(4),MinValueValidator(1)],default=1)
 	current_sem=models.IntegerField(validators=[MaxValueValidator(2),MinValueValidator(1)],default=1)
 	password=models.CharField(max_length=50,default="abcdefgh")
@@ -61,45 +61,24 @@ class dean_staff_office(models.Model):
    		return self.staff_name
 
 class dean(models.Model):
-	dateto=models.DateField()
-	datefrom=models.DateField()
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
-	class Meta:
-		unique_together=('dateto','datefrom','faculty_id')
 	def __str__(self):
    		return self.faculty_id.name
 
 
 class hod(models.Model):
-	dateto=models.DateField()
-	datefrom=models.DateField()
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
-	class Meta:
-		unique_together=('datefrom','faculty_id')
 	def __str__(self):
    		return self.faculty_id.name
 
 
 class advisor(models.Model):
-
 	batch=models.ForeignKey(batch,on_delete=models.CASCADE)
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
 		unique_together=('faculty_id','batch')
 	def __str__(self):
    		return self.faculty_id.name
-
-
-
-class related(models.Model):
-	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
-	staff_id=models.ForeignKey(dean_staff_office,on_delete=models.CASCADE)
-	dateto=models.DateField()
-	datefrom=models.DateField()
-	class Meta:
-		unique_together=('staff_id','dateto','datefrom')
-	def __str__(self):
-   		return self.faculty_id.name + "  " + self.staff_id.staff_name
 	
 class teaches(models.Model):
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)

@@ -63,7 +63,7 @@ def hod_db(request):
 					if hods.faculty_id.dept_id  == dept:
 						hods.delete()
 			good_message='Added succesfully'
-			hod_obj = hod(faculty_id=faculty_obj,datefrom=datetime.datetime.now(),dateto=datetime.datetime.now())
+			hod_obj = hod(faculty_id=faculty_obj)
 			hod_obj.save()
 		return redirect('/dean_staff_office/add_hod')
 					
@@ -410,7 +410,7 @@ def update_sem_year_form(request):
 		good_message = ''
 		return HttpResponse(template.render(context, request))
 	else:
-		redirect('/dean_staff_office/')
+		return redirect('/dean_staff_office/')
 
 
 def faculty_catalogue(request):
@@ -425,53 +425,87 @@ def faculty_catalogue(request):
 
 
 def update_sem_year(request):
-	updated_year = int(request.POST['year'])
-	updated_sem = int(request.POST['sem'])
+	if request.session.has_key('staff_id'):
+		updated_year = int(request.POST['year'])
+		updated_sem = int(request.POST['sem'])
 
-	current_objs = current.objects.all()
-	curr_year=0
-	for curr in current_objs:
-		curr_year = curr.current_year
-
-
-	student_objs = student.objects.all()
-
-	print(curr_year)
-	print(updated_year)
-	
-		
-	if((updated_year == curr_year+1) or (updated_year==curr_year)):
-		print("yes")
-		for stu in student_objs:
-			if(updated_year==curr_year+1):
-				y = stu.current_year
-				stu.current_year = y+1
-			stu.current_sem = updated_sem
-			stu.save()
-
+		current_objs = current.objects.all()
+		curr_year=0
 		for curr in current_objs:
-			curr.current_sem=updated_sem
-			curr.current_year= updated_year
-			curr.save()
-		global good_message
-		good_message = "Year and semester updated!!"
-		
-			
+			curr_year = curr.current_year
+		student_objs = student.objects.all()
+		print(curr_year)
+		print(updated_year)	
+		if((updated_year == curr_year+1) or (updated_year==curr_year)):
+			for student_obj in student_objs:
+				prev_cgpa = student_obj.cgpa
+				prev_credit = student_obj.total_credits
+				current_obj = current.objects.all()
+				for obj in current_obj:
+					curr_year=obj.current_year
+					curr_sem=obj.current_sem
+				if(curr_sem == 1):
+					prev_sem = 2
+					prev_year = curr_year -1
+				elif(curr_sem == 2):
+					prev_sem = 1
+					prev_year = curr_year
+				course_stu_list = grades.objects.filter(student_id = student_obj)
+				sums = 0
+				add_credit = 0
+				prev_sem_credit=0
+				for c in course_stu_list:
+					if(int(c.grade)>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
+						course_obj = course.objects.get(course_id = c.teaches.course_id.course_id)
+						credit = course_obj.credit_struct
+						t_credit = 0
+						for d in credit:
+							t_credit=t_credit+int(d)
+						prev_sem_credit = prev_sem_credit+t_credit
+					elif(int(c.grade)>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
+						course_obj = course.objects.get(course_id = c.teaches.course_id.course_id)
+						credit = course_obj.credit_struct
+						t_credit = 0
+						for d in credit:
+							t_credit=t_credit+int(d)
+						add_credit = add_credit + t_credit
+						sums = sums + t_credit*int(c.grade)
+				if student_obj.total_credits+add_credit != 0:
+					sums = (sums + prev_cgpa*student_obj.total_credits)/(student_obj.total_credits+add_credit)
+				student_obj.total_credits = student_obj.total_credits+add_credit
+				student_obj.cgpa =  sums
+				div=2
+				if student_obj.current_year==1 and student_obj.current_sem==1:
+					div=1
+				student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/div
+				student_obj.curr_registered_credits=0
+
+				print(student_obj.total_credits)
+				print(student_obj.cgpa)
+				print(student_obj.max_credit)
+				student_obj.save()
+			for stu in student_objs:
+				if(updated_year==curr_year+1):
+					y = stu.current_year
+					stu.current_year = y+1
+				stu.current_sem = updated_sem
+				stu.save()
+			for curr in current_objs:
+				curr.current_sem=updated_sem
+				curr.current_year= updated_year
+				curr.save()
+			global good_message
+			good_message = "Year,semester and  cgpa updated!!"
+			return redirect('/dean_staff_office/update_sem_year_form')
+		else:
+			print("no")
+			global error_message
+			error_message = "Update only by 1 year!!!"
+			return redirect('/dean_staff_office/update_sem_year_form/')
+	
 	else:
-		print("no")
-		global error_message
-		error_message = "Update only by 1 year!!!"
-		return redirect('/dean_staff_office/update_sem_year_form/')
+		return redirect('/dean_staff_office')
 	
-	
-	return redirect('/dean_staff_office/update_sem_year_formd')
-
-	
-
-
-
-
-
 def add_faculty(request):
 	if request.session.has_key('staff_id'):
 		template = loader.get_template('dean_staff_office/add_faculty.html')
@@ -605,50 +639,3 @@ def update_courses_students():
 			successfull_register_obj.delete()
 
 
-def calculate_cgpa(request):
-	if request.session.has_key('staff_id'):
-		student_all = student.objects.all()
-
-		for student_obj in student_all:
-			prev_cgpa = student_obj.cgpa
-			prev_credit = student_obj.total_credits
-			curr_sem = student_obj.current_sem
-			curr_year = student_obj.current_year
-
-			if(curr_sem == 1):
-				prev_sem = 2
-				prev_year = curr_year -1
-			elif(curr_sem == 2):
-				prev_sem = 1
-				prev_year = curr_year
-
-			course_stu_list = grades.objects.filter(student_id = student_id)
-			sums = 0
-			add_credit = 0
-			prev_sem_credit=0
-			for c in course_stu_list:
-
-				if(c.grade>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
-					course_obj = course.objects.get(course_id = c.teaches.course_id)
-					credit = course_obj.credit_struct
-					t_credit = 0
-					for d in credit:
-						t_credit=t_credit+int(d)
-					prev_sem_credit = prev_sem_credit+t_credit
-
-				elif(c.grade>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
-					course_obj = course.objects.get(course_id = c.teaches.course_id)
-					credit = course_obj.credit_struct
-					t_credit = 0
-					for d in credit:
-						t_credit=t_credit+int(d)
-					add_credit = add_credit + t_credit
-					sums = sums + t_credit*c.grades
-				sums = (sums + prev_cgpa*prev_credit)/(prev_credit+add_credit)
-				student_obj.total_credits = prev_credit+add_credit
-				student_obj.cgpa =  sums
-				if(student_obj.year ==1 and student_obj.sem ==1):
-					prev_sem_credit=0
-				student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/2
-				student_obj.save()
-	return redirect('/dean_staff_office/home')

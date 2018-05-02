@@ -68,10 +68,15 @@ def home(request):
 		student_obj = student.objects.get(student_id = student_id)
 		takes_obj = takes.objects.filter(student_obj = student_obj)
 		your_courses = []
+		current_obj = current.objects.all()
+		for obj in current_obj:
+			current_year=obj.current_year
+			current_sem=obj.current_sem
 		for takes_t in takes_obj:
-			for batch in takes_t.teaches.batch.all():
-				if student_obj.current_year == batch.year:
-					your_courses.append(takes_t.teaches)
+			if takes_t.teaches.year==current_year and takes_t.teaches.semester==current_sem:
+				your_courses.append(takes_t.teaches)
+
+					
 				
 		portal_objs = portalsOpen.objects.all()
 		crp_open = False
@@ -108,31 +113,32 @@ def register_courses(request):
 			student_id=request.session['student_id']
 			template = loader.get_template('studentportal/register_courses.html')
 			student_obj = student.objects.get(student_id = student_id)
-			current_year = now.year
-			if student_obj.current_sem == 2:
-				current_year = current_year - 1
+			current_obj = current.objects.all()
+			for obj in current_obj:
+				current_year=obj.current_year
+				current_sem=obj.current_sem
 
 
 			to_your_batch = []
 			to_other_batch = []
 			teaches_objs_old = teaches.objects.filter(year = current_year, semester = student_obj.current_sem)
 			teaches_objs = []
-			takes_obj = takes.objects.filter(student_obj = student_obj)
-			your_courses = []
-			for takes_t in takes_obj:
-				for batch in takes_t.teaches.batch.all():
-					if student_obj.current_year == batch.year:
-						your_courses.append(takes_t.teaches)
+			print(teaches_objs_old)
+			# takes_obj = takes.objects.filter(student_obj = student_obj)
+			# your_courses = []
+			# for takes_t in takes_obj:
+			# 	for batch in takes_t.teaches.batch.all():
+			# 		if student_obj.current_year == batch.year:
+			# 			your_courses.append(takes_t.teaches)
 			
 			for teaches_obj_old in teaches_objs_old:
 				teaches_objs.append(teaches_obj_old)
 
-			for your_courses_tt in your_courses:
-				print(teaches_objs, your_courses_tt)
-				if your_courses_tt not in teaches_objs:
-					teaches_objs.append(your_courses_tt)
-				elif your_courses_tt in teaches_objs:
-					teaches_objs.remove(your_courses_tt)
+			# for your_courses_tt in your_courses:
+			# 	if your_courses_tt not in teaches_objs:
+			# 		teaches_objs.append(your_courses_tt)
+			# 	elif your_courses_tt in teaches_objs:
+			# 		teaches_objs.remove(your_courses_tt)
 			
 			for teaches_t in teaches_objs:
 				for batch_t in teaches_t.batch.all():
@@ -149,6 +155,8 @@ def register_courses(request):
 			for success_reg_objs in success_reg_obj:
 				if success_reg_objs.teaches in to_your_batch:
 					to_your_batch.remove(success_reg_objs.teaches)
+				if success_reg_objs.teaches in to_other_batch:
+					to_other_batch.remove(success_reg_objs.teaches)
 				successful_registered.append(success_reg_objs.teaches)
 
 
@@ -203,15 +211,9 @@ def add_course_batch(request):
 			for batch in takes_t.teaches.batch.all():
 				years.append(batch.year)
 
-		taken_this_year = []
-		for takes_t in takes_obj:
-			if student_obj.current_sem == takes_t.teaches.semester:
-				for year in years:
-					if year == student_obj.current_year:
-						taken_this_year.append(takes_t)
-
 		same_slot_courses = []
-		for teaches_t in taken_this_year:
+		successfull_register_objs = successfull_register.objects.filter(student_id = student_obj)
+		for teaches_t in successfull_register_objs:
 			if teaches_t.teaches.slot == slot:
 				same_slot_courses.append(teaches_t)
 		#same slot
@@ -311,15 +313,9 @@ def add_course_other_batch(request):
 				years.append(batch.year)
 
 
-		taken_this_year = []
-		for takes_t in takes_obj:
-			if student_obj.current_sem == takes_t.teaches.semester:
-				for year in years:
-					if year == student_obj.current_year:
-						taken_this_year.append(takes_t)
-
 		same_slot_courses = []
-		for teaches_t in taken_this_year:
+		successfull_register_objs = successfull_register.objects.filter(student_id = student_obj)
+		for teaches_t in successfull_register_objs:
 			if teaches_t.teaches.slot == slot:
 				same_slot_courses.append(teaches_t)
 		#same slot
