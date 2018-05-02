@@ -298,12 +298,39 @@ def view_tokens(request):
 		for current_obj in current_objs:
 			current_year = current_obj.current_year
 			current_sem = current_obj.current_sem
+
+
 		teaches_course_tokens = []
 		teaches_obj = teaches.objects.filter(faculty_id = faculty_obj, year = current_year, semester = current_sem)
 		for teaches_tt in teaches_obj:
 			teaches_courses = token.objects.filter(teaches = teaches_tt,status = 1)
 			for teaches_course in teaches_courses:
 				teaches_course_tokens.append(teaches_course)
+
+
+		hod_list = hod.objects.all()
+		hod_course = token.objects.filter(status = 2)
+	
+
+		for h in hod_list:
+			if(h.faculty_id == faculty_obj):
+				d = faculty_obj.dept_id				
+				for i in hod_course:
+					if (i.student_obj.dept_id==d):
+						teaches_course_tokens.append(i)
+
+		dean_list = dean.objects.all()
+		dean_course = token.objects.filter(status = 3)
+	
+
+		for h in dean_list:
+			if(h.faculty_id == faculty_obj):
+				d = faculty_obj.dept_id				
+				for i in dean_course:
+					if (i.student_obj.dept_id==d):
+						teaches_course_tokens.append(i)
+
+
 
 		template = loader.get_template('facultyportal/token.html')
 		context = {'teaches_course_tokens': teaches_course_tokens}
@@ -315,20 +342,22 @@ def view_tokens(request):
 
 def accept_close(request):
 	if request.session.has_key('faculty_id'):
+		faculty_id = request.session['faculty_id']
 		if request.method =="POST":
+			print("yesssss")
 			request_value = request.POST['accept_close']
 			request_value_att = request_value.split('+')
 			student_id = request_value_att[0]
 			course_id = request_value_att[1]
 			semester = int(request_value_att[2])
 			year = int(request_value_att[3])
+			facl = request_value_att[4]
 			student_obj = student.objects.get(student_id = student_id)
-			course_obj = course.objects.get(course_id = course_id)
-			faculty_id = request.session['faculty_id']
-			faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+			course_obj = course.objects.get(course_id = course_id)	
+			faculty_obj = faculty.objects.get(faculty_id = facl)
 			teaches_obj = teaches.objects.get(faculty_id = faculty_obj, course_id = course_obj, semester = semester, year = year)
 			token_obj = token.objects.get(student_obj = student_obj, teaches = teaches_obj).delete()
-			takes_obj = takes(student_obj = student_obj, teaches = teaches_obj)
+			takes_obj = successfull_register(student_id = student_obj, teaches = teaches_obj)
 			takes_obj.save()
 			course_credit = 0
 			n = int(course_obj.credit_struct)
@@ -351,10 +380,10 @@ def reject_close(request):
 			course_id = request_value_att[1]
 			semester = int(request_value_att[2])
 			year = int(request_value_att[3])
+			facl = request_value_att[4]
 			student_obj = student.objects.get(student_id = student_id)
 			course_obj = course.objects.get(course_id = course_id)
-			faculty_id = request.session['faculty_id']
-			faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+			faculty_obj = faculty.objects.get(faculty_id = facl)
 			teaches_obj = teaches.objects.get(faculty_id = faculty_obj, course_id = course_obj, semester = semester, year = year)
 			token_obj = token.objects.get(student_obj = student_obj, teaches = teaches_obj).delete()
 			return redirect('/facultyportal/view_tokens/')
@@ -375,12 +404,13 @@ def accept_pass(request):
 			year = int(request_value_att[3])
 			student_obj = student.objects.get(student_id = student_id)
 			course_obj = course.objects.get(course_id = course_id)
-			faculty_id = request.session['faculty_id']
-			faculty_obj = faculty.objects.get(faculty_id = faculty_id)
+			facl= request_value_att[4]
+			faculty_obj = faculty.objects.get(faculty_id = facl)
 			teaches_obj = teaches.objects.get(faculty_id = faculty_obj, course_id = course_obj, semester = semester, year = year)
 			token_obj = token.objects.get(student_obj = student_obj, teaches = teaches_obj)
 			token_obj.status = token_obj.status + 1
 			token_obj.save()
+
 			return redirect('/facultyportal/view_tokens/')
 		else:
 			return redirect('/facultyportal/')

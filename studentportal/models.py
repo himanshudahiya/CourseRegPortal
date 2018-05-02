@@ -81,7 +81,7 @@ class hod(models.Model):
 
 
 class advisor(models.Model):
-	
+
 	batch=models.ForeignKey(batch,on_delete=models.CASCADE)
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
@@ -134,7 +134,7 @@ class successfull_register(models.Model):
 class token(models.Model):
 	student_obj=models.ForeignKey(student,on_delete=models.CASCADE)
 	teaches=models.ForeignKey(teaches,on_delete=models.CASCADE)
-	status=models.IntegerField()
+	status=models.IntegerField(default=1)
 	reason=models.TextField(default = ":and:")
 
 	class Meta:

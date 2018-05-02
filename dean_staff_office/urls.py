@@ -19,6 +19,7 @@ urlpatterns=[
 	url('^edit_student/(?P<student_id>[A-Za-z]*[0-9]+)', views.edit_student, name='edit_student'),
 	url('^student_edit_post/(?P<student_id_prev>[A-Za-z]*[0-9]+)', views.student_edit_post, name='student_edit_post'),
 
+
 	url('^add_hod', views.add_hod, name='add_hod'),
 	url('^hod_db', views.hod_db, name='hod_db'),
 	url('^add_advisor', views.add_advisor, name='add_advisor'),
@@ -26,6 +27,9 @@ urlpatterns=[
 
 	
 	
+
+	url('^update_sem_year_form' , views.update_sem_year_form , name = 'update_sem_year_form'),
+	url('^update_sem_year' , views.update_sem_year , name = 'update_sem_year'),
 
 	url('^faculty_catalogue/', views.faculty_catalogue, name='faculty_catalogue'),
 	url('^add_faculty', views.add_faculty, name='add_faculty'),

@@ -18,6 +18,8 @@ urlpatterns = [
 	url('^accept_close', views.accept_close, name='accept_close'),
 	url('^reject_close', views.reject_close, name='reject_close'),
 	url('^accept_pass', views.accept_pass, name='accept_pass'),
+
 	url('^update_cgpa', views.update_cgpa, name='update_cgpa'),
+
 	]
 
