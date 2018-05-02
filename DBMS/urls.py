@@ -21,5 +21,7 @@ urlpatterns = [
     url('^register/', include('register.urls')),
     url('^studentportal/', include('studentportal.urls')),
     url('^facultyportal/', include('facultyportal.urls')),
+
     url('^dean_staff_office/',include('dean_staff_office.urls'))
+
 ]

@@ -8,7 +8,7 @@ from studentportal.models import *
 import datetime
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 # Create your views here.
 def index(request):
 	template = loader.get_template('dean_staff_office/login.html')
@@ -20,6 +20,144 @@ global error_message
 error_message=''
 global good_message
 good_message = ''
+
+def add_hod(request):
+	template =loader.get_template('dean_staff_office/add.html')
+	context = {}
+	faculty_obj=faculty.objects.all()
+	departments=department.objects.all()
+	global error_message
+	
+	global good_message
+	
+	context = {'faculty_obj':faculty_obj,'departments':departments,'error_message':error_message,'good_message':good_message}
+	error_message=''
+	good_message=''
+	print(faculty_obj)
+	if request.session.has_key('staff_id'):
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def hod_db(request):
+	global error_message
+	
+	global good_message
+	
+	if request.session.has_key('staff_id'):
+		faculty_id=request.POST['faculty']
+		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
+		dept=faculty_obj.dept_id
+		dept_form=request.POST['dept']
+		dept_form_obj=department.objects.get(dept_id=dept_form)
+
+		if dept != dept_form_obj:
+			error_message='Not of same department'
+			return redirect('/dean_staff_office/add_hod')
+		
+
+		else:
+			hod_obj=hod.objects.all()
+			if hod_obj is not None:
+				for hods in hod_obj:
+					if hods.faculty_id.dept_id  == dept:
+						hods.delete()
+			good_message='Added succesfully'
+			hod_obj = hod(faculty_id=faculty_obj,datefrom=datetime.datetime.now(),dateto=datetime.datetime.now())
+			hod_obj.save()
+		return redirect('/dean_staff_office/add_hod')
+					
+					
+		
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def add_advisor(request):
+	template =loader.get_template('dean_staff_office/add_advisor.html')
+	context = {}
+	faculty_obj=faculty.objects.all()
+	batch_obj=batch.objects.all()
+	global error_message
+	
+	global good_message
+	
+	context = {'faculty_obj':faculty_obj,'batch_obj':batch_obj,'error_message':error_message,'good_message':good_message}
+	error_message=''
+	good_message=''
+	print(faculty_obj)
+	if request.session.has_key('staff_id'):
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def advisor_db(request):
+	global error_message
+	
+	global good_message
+	
+	
+	if request.session.has_key('staff_id'):
+		
+
+		faculty_id=request.POST['faculty']
+		batch_str=request.POST['batch']
+		
+		batch_attr=batch_str.split('+')
+		year=int(batch_attr[0])
+		print(year)
+		dept_id=int(batch_attr[1])
+		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
+		dept_obj=department.objects.get(dept_id=dept_id)
+		batch_add=batch.objects.get(year=year,dept=dept_obj)
+
+
+		if(dept_obj !=faculty_obj.dept_id):
+			error_message='Not of same department'
+		else:
+			advisor_obj=advisor.objects.filter(batch=batch_add)
+			if advisor_obj is not None:
+				advisor_obj.delete()
+			good_message='Added succesfully'
+			advisor_obj = advisor(faculty_id=faculty_obj,batch=batch_add)
+			advisor_obj.save()
+		return redirect('/dean_staff_office/add_advisor')
+			
+		
+		
+		
+	else:
+		return redirect('/dean_staff_office/')
+
+
+
+
+
+
+# def add_advisor(request):
+# 	template =loader.get_template('dean_staff_office/add.html')
+# 	context = {}
+# 	faculty_obj=faculty.objects.all()
+# 	departments=department.objects.all()
+# 	context = {'faculty_obj':faculty_obj,'departments':departments}
+# 	if request.session.has_key('staff_id'):
+# 		return HttpResponse(template.render(context,request))
+# 	else:
+# 		return redirect('/dean_staff_office/')
+# # def add_advisor(request):
+# 	template loader.get_template('dean_staff_office/add.html')
+# 	context = {}
+# 	if request.session.has_key('staff_id'):
+# 		return HttpResponse(template.render(context,request))
+# 	else:
+# 		return redirect('/dean_staff_office/')
+
+
+
+
+
+
+
 def login_user(request):
 	if request.session.has_key('staff_id'):
 		return home(request)
@@ -29,13 +167,13 @@ def login_user(request):
 	    if staff_id is not None:
 	    	if dean_staff_office.objects.filter(staff_id = staff_id).exists():
 		    	staff_obj = dean_staff_office.objects.get(staff_id = staff_id)
-		        if staff_obj is None:
+		    	if staff_obj is None:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
 		        	template = loader.get_template('dean_staff_office/login.html')
 		        	return HttpResponse(template.render(context, request))
-		        elif staff_obj is not None:
+		    	elif staff_obj is not None:
 		        	if staff_obj.password == password:
 		        		request.session['staff_id'] = staff_id
 		        		return redirect('/dean_staff_office/home')
@@ -43,7 +181,7 @@ def login_user(request):
 		        		context = {'error_message': 'Invalid login'}
 		        		template = loader.get_template('dean_staff_office/login.html')
 		        		return HttpResponse(template.render(context, request))
-		        else:
+		    	else:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
@@ -411,7 +549,61 @@ def faculty_edit_post(request, faculty_id_prev):
 
 
 def portal_open_close(request):
-	print("324sdfa")
+	if request.session.has_key('staff_id'):
+		template = loader.get_template('dean_staff_office/portal_open_close.html')
+		portal_open_close_objs = portalsOpen.objects.all()
+		crp_open = False
+		grade_update_open = False
+		global good_message
+		for portal_open_close_obj in portal_open_close_objs:
+			crp_open = portal_open_close_obj.crp_open
+			grade_update_open = portal_open_close_obj.grade_update_open
+		context = {'good_message':good_message, 'crp_open':crp_open, 'grade_update_open':grade_update_open}
+		good_message = ''
+		return HttpResponse(template.render(context, request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def portals_post(request):
+	if request.session.has_key('staff_id'):
+		if request.method=="POST":
+			crp_open_list = request.POST.getlist('id_crp_open')
+			print('crp_open_list=', crp_open_list)
+			grade_update_open_list = request.POST.getlist('id_grade_open')
+			print(grade_update_open_list)
+			if not crp_open_list:
+				crp_open = False
+			else:
+				crp_open = True
+			if not grade_update_open_list:
+				grade_update_open = False
+			else:
+				grade_update_open = True
+			portal_open_close_objs = portalsOpen.objects.all()
+			for portal_open_close_obj in portal_open_close_objs:
+				portal_open_close_obj.crp_open = crp_open
+				portal_open_close_obj.grade_update_open = grade_update_open
+				portal_open_close_obj.save()
+			global good_message
+			good_message = 'Portal Updated succesfully!!'
+			if crp_open == False:
+				update_courses_students()
+			return redirect('/dean_staff_office/portal_open_close')
+		else:
+			return redirect('/dean_staff_office/')
+	else:
+		return redirect('/dean_staff_office/')
+
+def update_courses_students():
+	student_objs = student.objects.all()
+	for student_obj in student_objs:
+		token_objs = token.objects.filter(student_obj = student_obj).delete()
+		successfull_register_objs = successfull_register.objects.filter(student_id=student_obj)
+		for successfull_register_obj in successfull_register_objs:
+			takes_obj = takes(student_obj = student_obj, teaches = successfull_register_obj.teaches)
+			takes_obj.save()
+			successfull_register_obj.delete()
+
 
 def calculate_cgpa(request):
 	if request.session.has_key('staff_id'):

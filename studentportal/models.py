@@ -75,12 +75,13 @@ class hod(models.Model):
 	datefrom=models.DateField()
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
-		unique_together=('dateto','datefrom','faculty_id')
+		unique_together=('datefrom','faculty_id')
 	def __str__(self):
    		return self.faculty_id.name
 
 
 class advisor(models.Model):
+
 	batch=models.ForeignKey(batch,on_delete=models.CASCADE)
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
@@ -158,5 +159,6 @@ class current(models.Model):
 class portalsOpen(models.Model):
 	crp_open = models.BooleanField(default=False)
 	grade_update_open = models.BooleanField(default=False)
+	# crp_close=models.BooleanField(default=False)
 	def __str__(self):
 		return str(self.crp_open) +" " +str(self.grade_update_open)

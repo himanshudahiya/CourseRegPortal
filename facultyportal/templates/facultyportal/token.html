@@ -19,10 +19,12 @@
         {% csrf_token %}
             <button type="submit" name="reject_close" value="{{tokens.student_obj.student_id}}+{{tokens.teaches.course_id.course_id}}+{{tokens.teaches.semester}}+{{tokens.teaches.year}}+{{tokens.teaches.faculty_id.faculty_id}}">Reject</button>
         </form>
+        {%if is_dean == False%}
         <form method="post" action="{% url 'facultyportal:accept_pass' %}">
         {% csrf_token %}
             <button type="submit" name="accept_pass" value="{{tokens.student_obj.student_id}}+{{tokens.teaches.course_id.course_id}}+{{tokens.teaches.semester}}+{{tokens.teaches.year}}+{{tokens.teaches.faculty_id.faculty_id}}">Accept &amp; Pass</button>
         </form>
+        {%endif%}
     	</div>
     </li>
     </form>

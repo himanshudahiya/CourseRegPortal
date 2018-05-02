@@ -52,7 +52,55 @@ def logout_user(request):
 	if request.session.has_key('faculty_id'):
 		del request.session['faculty_id']
 	return redirect('/facultyportal/')
-	
+
+
+def update_cgpa(request):
+    if request.session.has_key('faculty_id'):
+        student_all = student.objects.all()
+
+        for student_obj in student_all:
+            prev_cgpa = student_obj.cgpa
+            prev_credit = student_obj.total_credits
+            curr_sem = student_obj.current_sem
+            curr_year = student_obj.current_year
+
+            if(curr_sem == 1):
+                prev_sem = 2
+                prev_year = curr_year -1
+            elif(curr_sem == 2):
+                prev_sem = 1
+                prev_year = curr_year
+
+            course_stu_list = grades.objects.filter(student_id = student_obj)
+            sums = 0
+            add_credit = 0
+            prev_sem_credit=0
+            for c in course_stu_list:
+
+                if(int(c.grade)>=4 and c.teaches.semester == prev_sem and c.teaches.year == prev_year ):
+                    course_obj = course.objects.get(course_id = c.teaches.course_id)
+                    credit = course_obj.credit_struct
+                    t_credit = 0
+                    for d in credit:
+                        t_credit=t_credit+int(d)
+                    prev_sem_credit = prev_sem_credit+t_credit
+
+                elif(int(c.grade)>=4 and c.teaches.semester == curr_sem and c.teaches.year == curr_year ):
+                    course_obj = course.objects.get(course_id = c.teaches.course_id)
+                    credit = course_obj.credit_struct
+                    t_credit = 0
+                    for d in credit:
+                        t_credit=t_credit+int(d)
+                    add_credit = add_credit + t_credit
+                    sums = sums + t_credit*c.grades
+                sums = (sums + prev_cgpa*prev_credit)/(prev_credit+add_credit)
+                student_obj.total_credits = prev_credit+add_credit
+                student_obj.cgpa =  sums
+                student_obj.max_credit = 1.25*(add_credit+prev_sem_credit)/2
+                student_obj.save()
+    return redirect('/facultyportal/home')
+
+
 def home(request):
 	if request.session.has_key('faculty_id'):
 		faculty_id=request.session['faculty_id']
@@ -66,11 +114,18 @@ def home(request):
 		print(current_year)
 		print(current_sem)
 		print(teaches_obj)
+		isdean=0;
+		dean_obj=dean.objects.filter(faculty_id=faculty_obj)
+		if dean_obj.exists:
+			isdean=1
+		else:
+			isdean=0
+
 
 	#		for batch in takes_t.teaches.batch.all():
 	#			years.append(batch.year)
 	#	context = {'faculty_obj':faculty_obj,'takes_obj':takes_obj, 'years': years}
-		context = {'faculty_obj':faculty_obj,'teaches_obj':teaches_obj,'current_year':current_year,'current_sem':current_sem}
+		context = {'isdean':isdean,'faculty_obj':faculty_obj,'teaches_obj':teaches_obj,'current_year':current_year,'current_sem':current_sem}
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/facultyportal/')
@@ -85,11 +140,12 @@ def grade(request, course_id):
 		for obj in current_obj:
 			current_year=obj.current_year
 			current_sem=obj.current_sem
+
 		teaches_obj=teaches.objects.get(faculty_id=faculty_id,year=current_year,semester=current_sem,course_id=course_id)
 		takes_obj = takes.objects.filter(teaches=teaches_obj)
 		
 		grades_list = ['--', '10', '9', '8', '7', '6', '5', '4', '0']
-		
+
 		student_grade_exist_list = []
 		student_grade_not_exist_list =[]
 		for students in takes_obj:
@@ -116,6 +172,7 @@ def grade(request, course_id):
 			'student_grade_exist_list':student_grade_exist_list,
 			'student_grade_not_exist_list':student_grade_not_exist_list,
 		}
+
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/facultyportal/')
@@ -127,11 +184,8 @@ def update_grade(request,student_id,course_id):
 		grade=request.POST['grade']
 		print(student_id)
 		print(course_id)
-		# id_attr = two_id.split('+')
-		# print(two_id,id_attr)
-
-		# student_id = id_attr[0]
-		# course_id = id_attr[1]
+		print(grade)
+		
 		student_obj=student.objects.get(student_id=student_id)
 		current_obj = current.objects.all()
 		for obj in current_obj:
@@ -141,6 +195,7 @@ def update_grade(request,student_id,course_id):
 		if grades.objects.filter(student_id=student_obj,teaches=teaches_obj).exists():
 			grade_obj = grades.objects.get(student_id=student_obj,teaches=teaches_obj)
 			grade_obj.grade=grade
+
 		else:
 			grade_obj = grades(student_id=student_obj,teaches=teaches_obj,grade=grade)
 		grade_obj.save()
@@ -173,12 +228,14 @@ def float_new_courses(request):
 		
 		c_dept = course.objects.filter(dept_id = faculty_dept_id)
 		courses_of_dept=[]
-
+		courses_not_floated = []
 		for c in c_dept:
 			if(not teaches.objects.filter(course_id = c.course_id , faculty_id = faculty_id).exists()):
-				courses_of_dept.append(c)
+				courses_not_floated.append(c)
+			courses_of_dept.append(c)
 	
 		context = {'courses_of_dept':courses_of_dept, 
+					'courses_not_floated':courses_not_floated,
 				   'batch_obj':batch_obj
 			
 		}
@@ -216,8 +273,9 @@ def add_course_float(request):
 		prereq_tt = request.POST.getlist('prerequisite')
 		prereq_obj_list = []
 		for b in prereq_tt:
-			prereq_obj = course.objects.get(course_id = b)
-			prereq_obj_list.append(prereq_obj)
+			if b != course_id:
+				prereq_obj = course.objects.get(course_id = b)
+				prereq_obj_list.append(prereq_obj)
 			
 
 
@@ -267,10 +325,11 @@ def view_tokens(request):
 		dean_list = dean.objects.all()
 		dean_course = token.objects.filter(status = 3)
 	
-
+		is_dean = False
 		for h in dean_list:
 			if(h.faculty_id == faculty_obj):
-				d = faculty_obj.dept_id				
+				d = faculty_obj.dept_id
+				is_dean = True				
 				for i in dean_course:
 					if (i.student_obj.dept_id==d):
 						teaches_course_tokens.append(i)
@@ -278,7 +337,7 @@ def view_tokens(request):
 
 
 		template = loader.get_template('facultyportal/token.html')
-		context = {'teaches_course_tokens': teaches_course_tokens}
+		context = {'teaches_course_tokens': teaches_course_tokens, 'is_dean':is_dean}
 		return HttpResponse(template.render(context,request))
 
 	else:

@@ -7,7 +7,7 @@ from .models import *
 import datetime
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Create your views here.
 global error_message
@@ -29,13 +29,13 @@ def login_user(request):
 	    if student_id is not None:
 	    	if student.objects.filter(student_id = student_id).exists():
 	    		student_obj = student.objects.get(student_id = student_id)
-		        if student_obj is None:
+		    	if student_obj is None:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
 		        	template = loader.get_template('studentportal/login.html')
 		        	return HttpResponse(template.render(context, request))
-		        elif student_obj is not None:
+		    	elif student_obj is not None:
 		        	if student_obj.password == password:
 		        		request.session['student_id'] = student_id
 		        		return redirect('/studentportal/home')
@@ -43,7 +43,7 @@ def login_user(request):
 		        		context = {'error_message': 'Invalid login'}
 		        		template = loader.get_template('studentportal/login.html')
 		        		return HttpResponse(template.render(context, request))
-		        else:
+		    	else:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
@@ -99,6 +99,7 @@ def view_grades(request):
 		
 def register_courses(request):
 	if request.session.has_key('student_id'):
+
 		portal_objs = portalsOpen.objects.all()
 		crp_open = False
 		for portal_obj in portal_objs:
@@ -110,6 +111,7 @@ def register_courses(request):
 			current_year = now.year
 			if student_obj.current_sem == 2:
 				current_year = current_year - 1
+
 
 			to_your_batch = []
 			to_other_batch = []
@@ -149,6 +151,7 @@ def register_courses(request):
 					to_your_batch.remove(success_reg_objs.teaches)
 				successful_registered.append(success_reg_objs.teaches)
 
+
 			tokened_obj = token.objects.filter(student_obj = student_obj)
 			for tokened_objs in tokened_obj:
 				if tokened_objs.teaches in to_your_batch:
@@ -168,12 +171,15 @@ def register_courses(request):
 			return HttpResponse(template.render(context,request))
 		else:
 			return redirect('/studentportal/')
+
 	else:
 		return redirect('/studentportal/')
 
 
 
 def add_course_batch(request):
+	global error_message
+
 	if request.session.has_key('student_id'):
 		selected_course = request.POST['Add_Course']
 		student_id=request.session['student_id']
@@ -183,6 +189,7 @@ def add_course_batch(request):
 		semester = int(course_attr[2])
 		year = int(course_attr[3])
 		slot = str(course_attr[4])
+
 
 		student_obj = student.objects.get(student_id = student_id)
 		faculty_id_obj = faculty.objects.get(faculty_id = faculty_id)
@@ -213,9 +220,10 @@ def add_course_batch(request):
 			error_message = 'You have a course registered in same slot.'
 			return redirect('studentportal:register_courses')
 
+
 		if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 			token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "CGPA not satisfied")
-			global error_message
+			
 			error_message = ''
 			course_tokened = True
 		
@@ -229,7 +237,7 @@ def add_course_batch(request):
 				token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 			else:
 				token_tttt.reason = token_tttt.reason + " :and: " + "Credit limit not satisfied"
-			global error_message
+			
 			error_message = ''
 			token_tttt.save()
 			course_tokened = True
@@ -261,23 +269,27 @@ def add_course_batch(request):
 					token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
 					course_tokened = True
 
+
 		if course_tokened:
 			token_tttt.save()
 			return redirect('studentportal:register_courses')
+
 
 		if student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
 			registered_courses_ttt = successfull_register(student_id = student_obj, teaches = selected_course_obj)
 			registered_courses_ttt.save()
 			student_obj.curr_registered_credits = student_obj.curr_registered_credits + course_credit
 			student_obj.save()
-			global error_message
+			
 			error_message = ''
 			return redirect('studentportal:register_courses')
+
 		return redirect('studentportal:register_courses')
 	else:
 		return redirect('/studentportal/')
 
 def add_course_other_batch(request):
+	global error_message
 	if request.session.has_key('student_id'):
 		selected_course = request.POST['Add_Course']
 		student_id=request.session['student_id']
@@ -297,6 +309,7 @@ def add_course_other_batch(request):
 		for takes_t in takes_obj:
 			for batch in takes_t.teaches.batch.all():
 				years.append(batch.year)
+
 
 		taken_this_year = []
 		for takes_t in takes_obj:
@@ -318,7 +331,7 @@ def add_course_other_batch(request):
 		token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Student is of other batch")
 		if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 			token_tttt.reason = "CGPA not satisfied" + " :and: " + token_tttt.reason 
-			global error_message
+			
 			error_message = ''
 		
 		course_credit = 0
@@ -329,8 +342,9 @@ def add_course_other_batch(request):
 		if student_obj.curr_registered_credits + course_credit > student_obj.max_credit:
 			# token_tttt.reason = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 			token_tttt.reason = "Credit limit not satisfied" +  " :and: " + token_tttt.reason 
-			global error_message
+			
 			error_message = ''
+
 
 		prerequistes_list = selected_course_obj.prerequisite.all()
 		for prerequisite_tt in prerequistes_list:
@@ -349,17 +363,19 @@ def add_course_other_batch(request):
 				token_tttt.reason = token_tttt.reason + " :and: " + "Prerequisite not cleared"
 				
 		if student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
-			global error_message
+			
 			error_message = ''
 			token_tttt.save()
 			return redirect('studentportal:register_courses')
 		
+
 		token_tttt.save()
 		return redirect('studentportal:register_courses')
 	else:
 		return redirect('/studentportal/')
 
 def delete_reg_course(request):
+	global error_message
 	if request.session.has_key('student_id'):
 		selected_course = request.POST['Remove_Course']
 		student_id=request.session['student_id']

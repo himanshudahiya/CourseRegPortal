@@ -1,0 +1,41 @@
+
+<h2>Portals Open Close Portal</h2>
+<br>
+
+ {% if good_message %}
+ <p style="color: blue"><strong>{{good_message}}</strong></p>
+{% endif %}
+
+
+
+
+
+<form action="{% url 'dean_staff_office:portals_post'%}" method='post'>
+{% csrf_token %}
+<div class="form-group">
+    <label class="control-label col-sm-2" for="id_crp_open">
+        CRP Open:
+    </label>
+    <div class="col-sm-10">
+        <input id="id_crp_open" maxlength="30" name="id_crp_open" type="checkbox" {% if crp_open%} checked {% endif %}>
+    </div>
+</div>
+  
+  
+<br>
+<br>
+<div class="form-group">
+    <label class="control-label col-sm-2" for="id_grade_open">
+        Grade Update Open:
+    </label>
+    <div class="col-sm-10">
+        <input id="id_grade_open" maxlength="30" name="id_grade_open" type="checkbox" {% if grade_update_open%} checked {% endif %}>
+    </div>
+</div>
+<br>
+<input type="submit" value="Update Portals">
+
+  </form>
+
+
+<a href="{% url 'dean_staff_office:home'%}">Back to Home</a>
