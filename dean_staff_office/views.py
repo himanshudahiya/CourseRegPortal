@@ -8,7 +8,7 @@ from studentportal.models import *
 import datetime
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 # Create your views here.
 def index(request):
 	template = loader.get_template('dean_staff_office/login.html')
@@ -20,6 +20,121 @@ global error_message
 error_message=''
 global good_message
 good_message = ''
+
+def add_hod(request):
+	template =loader.get_template('dean_staff_office/add.html')
+	context = {}
+	faculty_obj=faculty.objects.all()
+	departments=department.objects.all()
+	context = {'faculty_obj':faculty_obj,'departments':departments}
+	print(faculty_obj)
+	if request.session.has_key('staff_id'):
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def hod_db(request):
+	global error_message
+	error_message=''
+	
+	if request.session.has_key('staff_id'):
+		
+
+		faculty_id=request.POST['faculty']
+		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
+		print(faculty_obj)
+		dept=faculty_obj.dept_id
+		hod_obj=hod.objects.filter(dateto=None)
+		if hod_obj.exists:
+			for hods in hod_obj:
+				if hods.faculty_obj.dept_id  is dept:
+					hods.faculty_obj.dateto=datetime.datetime.now()
+
+		
+
+
+
+
+		
+		
+		hod_obj = hod(faculty_id=faculty_obj,datefrom=datetime.datetime.now())
+		hod_obj.save()
+		return redirect('/dean_staff_office/add_hod')
+
+
+		
+
+
+
+		
+	else:
+		return redirect('/dean_staff_office/')
+
+
+def add_advisor(request):
+	template =loader.get_template('dean_staff_office/add_advisor.html')
+	context = {}
+	faculty_obj=faculty.objects.all()
+	batch_obj=batch.objects.all()
+	context = {'faculty_obj':faculty_obj,'batch_obj':batch_obj}
+	print(faculty_obj)
+	if request.session.has_key('staff_id'):
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def advisor_db(request):
+	
+	if request.session.has_key('staff_id'):
+		
+
+		faculty_id=request.POST['faculty']
+		batch_str=request.POST['batch']
+		
+		batch_attr=batch_str.split('+')
+		year=int(batch_attr[0])
+		print(year)
+		dept_id=int(batch_attr[1])
+		dept_obj=department.objects.get(dept_id=dept_id)
+		batch_add=batch.objects.get(year=year,dept=dept_obj)
+
+		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
+		
+		advisor_obj = advisor(faculty_id=faculty_obj,batch=batch_add)
+		advisor_obj.save()
+		return redirect('/dean_staff_office/add_advisor')
+	else:
+		return redirect('/dean_staff_office/')
+
+
+
+
+
+
+# def add_advisor(request):
+# 	template =loader.get_template('dean_staff_office/add.html')
+# 	context = {}
+# 	faculty_obj=faculty.objects.all()
+# 	departments=department.objects.all()
+# 	context = {'faculty_obj':faculty_obj,'departments':departments}
+# 	if request.session.has_key('staff_id'):
+# 		return HttpResponse(template.render(context,request))
+# 	else:
+# 		return redirect('/dean_staff_office/')
+# # def add_advisor(request):
+# 	template loader.get_template('dean_staff_office/add.html')
+# 	context = {}
+# 	if request.session.has_key('staff_id'):
+# 		return HttpResponse(template.render(context,request))
+# 	else:
+# 		return redirect('/dean_staff_office/')
+
+
+
+
+
+
+
 def login_user(request):
 	if request.session.has_key('staff_id'):
 		return home(request)
@@ -29,13 +144,13 @@ def login_user(request):
 	    if staff_id is not None:
 	    	if dean_staff_office.objects.filter(staff_id = staff_id).exists():
 		    	staff_obj = dean_staff_office.objects.get(staff_id = staff_id)
-		        if staff_obj is None:
+		    	if staff_obj is None:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
 		        	template = loader.get_template('dean_staff_office/login.html')
 		        	return HttpResponse(template.render(context, request))
-		        elif staff_obj is not None:
+		    	elif staff_obj is not None:
 		        	if staff_obj.password == password:
 		        		request.session['staff_id'] = staff_id
 		        		return redirect('/dean_staff_office/home')
@@ -43,7 +158,7 @@ def login_user(request):
 		        		context = {'error_message': 'Invalid login'}
 		        		template = loader.get_template('dean_staff_office/login.html')
 		        		return HttpResponse(template.render(context, request))
-		        else:
+		    	else:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}

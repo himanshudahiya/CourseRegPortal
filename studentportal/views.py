@@ -7,7 +7,7 @@ from .models import *
 import datetime
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Create your views here.
 global error_message
@@ -29,13 +29,13 @@ def login_user(request):
 	    if student_id is not None:
 	    	if student.objects.filter(student_id = student_id).exists():
 	    		student_obj = student.objects.get(student_id = student_id)
-		        if student_obj is None:
+		    	if student_obj is None:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
 		        	template = loader.get_template('studentportal/login.html')
 		        	return HttpResponse(template.render(context, request))
-		        elif student_obj is not None:
+		    	elif student_obj is not None:
 		        	if student_obj.password == password:
 		        		request.session['student_id'] = student_id
 		        		return redirect('/studentportal/home')
@@ -43,7 +43,7 @@ def login_user(request):
 		        		context = {'error_message': 'Invalid login'}
 		        		template = loader.get_template('studentportal/login.html')
 		        		return HttpResponse(template.render(context, request))
-		        else:
+		    	else:
 		        	context = {
 		        		'error_message': 'Invalid login'
 		        	}
@@ -92,6 +92,7 @@ def view_grades(request):
 		
 def register_courses(request):
 	if request.session.has_key('student_id'):
+		global error_message
 		student_id=request.session['student_id']
 		template = loader.get_template('studentportal/register_courses.html')
 		student_obj = student.objects.get(student_id = student_id)
@@ -136,7 +137,7 @@ def register_courses(request):
 		 	'tokened': tokened,
 		 	'error_message': error_message
 		}
-		global error_message
+		
 		error_message = ''
 		return HttpResponse(template.render(context,request))
 	else:
@@ -145,6 +146,7 @@ def register_courses(request):
 
 
 def add_course_batch(request):
+	global error_message
 	selected_course = request.POST['Add_Course']
 	student_id=request.session['student_id']
 	course_attr = selected_course.split('+')
@@ -185,8 +187,9 @@ def add_course_batch(request):
 		return redirect('studentportal:register_courses')
 
 	if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
+		
 		token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "CGPA not satisfied")
-		global error_message
+		
 		error_message = ''
 		course_tokened = True
 	
@@ -196,11 +199,12 @@ def add_course_batch(request):
 		course_credit, n = course_credit + n % 10, n // 10
 	# credit limit
 	if student_obj.curr_registered_credits + course_credit > student_obj.max_credit:
+
 		if course_tokened == False:
 			token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 		else:
 			token_tttt.reason = token_tttt.reason + " :and: " + "Credit limit not satisfied"
-		global error_message
+		
 		error_message = ''
 		token_tttt.save()
 		course_tokened = True
@@ -215,7 +219,7 @@ def add_course_batch(request):
 		registered_courses_ttt.save()
 		student_obj.curr_registered_credits = student_obj.curr_registered_credits + course_credit
 		student_obj.save()
-		global error_message
+		
 		error_message = ''
 		return redirect('studentportal:register_courses')
 	# elif student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
@@ -229,6 +233,7 @@ def add_course_batch(request):
 
 
 def add_course_other_batch(request):
+	global error_message
 	selected_course = request.POST['Add_Course']
 	student_id=request.session['student_id']
 	course_attr = selected_course.split('+')
@@ -268,7 +273,7 @@ def add_course_other_batch(request):
 	token_tttt = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Student is of other batch")
 	if selected_course_obj.min_cgpa_constraint > student_obj.cgpa:
 		token_tttt.reason = "CGPA not satisfied" + " :and: " + token_tttt.reason 
-		global error_message
+		
 		error_message = ''
 	
 	course_credit = 0
@@ -279,13 +284,13 @@ def add_course_other_batch(request):
 	if student_obj.curr_registered_credits + course_credit > student_obj.max_credit:
 		# token_tttt.reason = token(student_obj = student_obj,teaches = selected_course_obj,status = 1, reason = "Credit limit not satisfied")
 		token_tttt.reason = "Credit limit not satisfied" +  " :and: " + token_tttt.reason 
-		global error_message
+		
 		error_message = ''
 
 
 
 	if student_obj.curr_registered_credits + course_credit <= student_obj.max_credit:
-		global error_message
+		
 		error_message = ''
 		token_tttt.save()
 		return redirect('studentportal:register_courses')

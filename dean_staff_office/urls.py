@@ -18,4 +18,10 @@ urlpatterns=[
 	url('^student_post', views.student_post, name='student_post'),
 	url('^edit_student/(?P<student_id>[A-Za-z]*[0-9]+)', views.edit_student, name='edit_student'),
 	url('^student_edit_post/(?P<student_id_prev>[A-Za-z]*[0-9]+)', views.student_edit_post, name='student_edit_post'),
-]
+	url('^add_hod', views.add_hod, name='add_hod'),
+	url('^hod_db', views.hod_db, name='hod_db'),
+	url('^add_advisor', views.add_advisor, name='add_advisor'),
+	url('^advisor_db', views.advisor_db, name='advisor_db'),
+
+	
+	]

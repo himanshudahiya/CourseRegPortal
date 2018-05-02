@@ -1,0 +1,35 @@
+
+<h2>Hello Want to add Hod</h2>
+<br>
+
+<form action="{% url 'dean_staff_office:hod_db'%}" method='post'>
+{% csrf_token %}
+<div class="col-sm-10">
+    <select name="dept" required>
+        <option value="">--</option>
+        {% for dept in departments%}
+        {% if dept %}
+        <option value="{{dept.dept_id}}" >{{dept.dept_name}}</option>
+        {% endif %}
+        {% endfor %}
+    </select>
+</div>
+  
+  
+
+<div class="col-sm-10">
+    <select name="faculty" required>
+        <option value="">--</option>
+        {% for faculty in faculty_obj%}
+        {% if faculty %}
+        <option value="{{faculty.faculty_id}}">{{faculty.name}}</option>
+        {% endif %}
+        {% endfor %}
+    </select>
+</div>
+  
+<input type="submit" value="Add">
+
+  </form>
+
+

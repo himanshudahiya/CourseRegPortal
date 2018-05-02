@@ -84,17 +84,19 @@ def grade(request, course_id):
 		for obj in current_obj:
 			current_year=obj.current_year
 			current_sem=obj.current_sem
-		teaches_obj=teaches.objects.filter(faculty_id=faculty_id,year=current_year,semester=current_sem,course_id=course_id)
+		faculty_obj=faculty.objects.filter(faculty_id=faculty_id)
+
+		teaches_obj=teaches.objects.filter(faculty_id=faculty_obj[0],year=current_year,semester=current_sem,course_id=course_id)
 		takes_obj = takes.objects.filter(teaches=teaches_obj[0])
 
 		print(teaches_obj)
 		print(takes_obj)
-		
+		print(faculty_obj)
 		
 	#		for batch in takes_t.teaches.batch.all():
 	#			years.append(batch.year)
 	#	context = {'faculty_obj':faculty_obj,'takes_obj':takes_obj, 'years': years}
-		context = {'faculty_id':faculty_id,'takes_obj':takes_obj,'current_year':current_year,'current_sem':current_sem}
+		context = {'faculty_obj':faculty_obj,'takes_obj':takes_obj,'current_year':current_year,'current_sem':current_sem}
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/facultyportal/')
@@ -106,24 +108,27 @@ def update_grade(request,student_id,course_id):
 		grade=request.POST['grade']
 		print(student_id)
 		print(course_id)
+		print(grade)
 		# id_attr = two_id.split('+')
 		# print(two_id,id_attr)
 
 		# student_id = id_attr[0]
 		# course_id = id_attr[1]
-		student_obj=student.objects.filter(student_id=student_id)
+		student_obj=student.objects.get(student_id=student_id)
 		current_obj = current.objects.all()
 		for obj in current_obj:
 			current_year=obj.current_year
 			current_sem=obj.current_sem
-		teaches_obj=teaches.objects.filter(faculty_id=faculty_id,year=current_year,semester=current_sem,course_id=course_id)
-		grade_obj=grades.objects.filter(student_id=student_obj,teaches=teaches_obj)
-		if(grade_obj) is None:
+		teaches_obj=teaches.objects.get(faculty_id=faculty_id,year=current_year,semester=current_sem,course_id=course_id)
+		if grades.objects.filter(student_id=student_obj,teaches=teaches_obj).exists():
+			grade_obj = grades.objects.get(student_id=student_obj,teaches=teaches_obj)
+			grade_obj.grade=grade
+			grade_obj.save()
+			print("exists")
+		else:
 			grade_obj = grades(student_id=student_obj,teaches=teaches_obj,grade=grade)
 			grade_obj.save()
-
-		else:
-			grade_obj.grade=grade
+			print("does not exists")
 
 		return redirect('/facultyportal/grade/'+course_id)
 	else:

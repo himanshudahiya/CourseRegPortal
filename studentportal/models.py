@@ -75,21 +75,21 @@ class dean(models.Model):
 
 
 class hod(models.Model):
-	dateto=models.DateField()
+	dateto=models.DateField(default='')
 	datefrom=models.DateField()
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
-		unique_together=('dateto','datefrom','faculty_id')
+		unique_together=('datefrom','faculty_id')
 	def __str__(self):
    		return self.faculty_id.name
 
 
 class advisor(models.Model):
-	year=models.IntegerField()
-	batch=models.CharField(max_length=25)
+	
+	batch=models.ForeignKey(batch,on_delete=models.CASCADE)
 	faculty_id=models.ForeignKey(faculty,on_delete=models.CASCADE)
 	class Meta:
-		unique_together=('faculty_id','year')
+		unique_together=('faculty_id','batch')
 	def __str__(self):
    		return self.faculty_id.name
 
@@ -153,7 +153,3 @@ class grades(models.Model):
 	def __str__(self):
    		return self.student_id.name + " " + self.teaches.faculty_id.name + " " + self.teaches.course_id.title
 
-
-class current(models.Model):
-	current_year = models.IntegerField(default=now.year)
-	current_sem = models.IntegerField(default=1)
