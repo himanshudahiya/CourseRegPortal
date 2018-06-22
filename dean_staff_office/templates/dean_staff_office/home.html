@@ -1,7 +1,7 @@
 <h2>Hello {{ staff_obj.staff_name }}</h2>
 
 <a href="{% url 'dean_staff_office:course_catalogue'%}">Course Catalogue</a>
-<br><br>
+<br>
 <a href="{% url 'dean_staff_office:student_catalogue' %}">Student Catalogue</a>
 <br>
 <a href="{% url 'dean_staff_office:faculty_catalogue' %}">Faculty Catalogue</a>
@@ -10,12 +10,11 @@
 <br>
 <a href = "{% url 'dean_staff_office:portal_open_close'%}">CRP/Grade Update portals open/close</a>
 <br>
-
-
-
-
+<a href="{% url 'dean_staff_office:add_dean' %}">Add/Change Dean</a>
+<br>
 <a href="{% url 'dean_staff_office:add_hod' %}">Add HOD</a>
 <br>
 <a href="{% url 'dean_staff_office:add_advisor' %}">Add Advisor</a>
+<br>
 <br>
 <a href="{% url 'dean_staff_office:logout' %}">Logout</a>

@@ -15,11 +15,14 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from . import views
+from django.views.generic.base import TemplateView
+
 
 urlpatterns = [
+    url('^$', views.index, name='index'),
     url('^admin/', admin.site.urls),
     url('^studentportal/', include('studentportal.urls')),
     url('^facultyportal/', include('facultyportal.urls')),
     url('^dean_staff_office/',include('dean_staff_office.urls'))
-
 ]

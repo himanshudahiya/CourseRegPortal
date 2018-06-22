@@ -51,6 +51,8 @@ def login_user(request):
 def logout_user(request):
 	if request.session.has_key('faculty_id'):
 		del request.session['faculty_id']
+	if request.session.has_key('dean_id'):
+		del request.session['dean_id']
 	return redirect('/facultyportal/')
 
 def update_cgpa(request):
@@ -114,21 +116,20 @@ def home(request):
 		for obj in current_obj:
 			current_year=obj.current_year
 			current_sem=obj.current_sem
-		print(current_year)
-		print(current_sem)
-		print(teaches_obj)
-		isdean=0;
-		dean_obj=dean.objects.filter(faculty_id=faculty_obj)
-		if dean_obj.exists:
-			isdean=1
-		else:
-			isdean=0
-
+		dean_list = dean.objects.all()
+		is_dean = False
+		for h in dean_list:
+			if(h.faculty_id == faculty_obj):
+				d = faculty_obj.dept_id
+				is_dean = True				
+				
+		if is_dean:
+			request.session['dean_id'] = faculty_id
 
 	#		for batch in takes_t.teaches.batch.all():
 	#			years.append(batch.year)
 	#	context = {'faculty_obj':faculty_obj,'takes_obj':takes_obj, 'years': years}
-		context = {'isdean':isdean,'faculty_obj':faculty_obj,'teaches_obj':teaches_obj,'current_year':current_year,'current_sem':current_sem}
+		context = {'is_dean':is_dean,'faculty_obj':faculty_obj,'teaches_obj':teaches_obj,'current_year':current_year,'current_sem':current_sem}
 		return HttpResponse(template.render(context,request))
 	else:
 		return redirect('/facultyportal/')

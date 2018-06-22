@@ -20,6 +20,10 @@ hello {{ faculty_obj.name }}
 <br>
 <a href="{% url 'facultyportal:float_new_courses'%}">Float Courses</a> 
 <br>
+{% if is_dean%}
+<a href="{% url 'dean_staff_office:login'%}" target="blank">Dean Login</a>
+{% endif%}
+<br>
 <a href="{% url 'facultyportal:logout' %}">Logout</a>
 
 <br>

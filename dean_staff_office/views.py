@@ -638,4 +638,42 @@ def update_courses_students():
 			takes_obj.save()
 			successfull_register_obj.delete()
 
+def add_dean(request):
+	if request.session.has_key('staff_id'):
+		template =loader.get_template('dean_staff_office/add_dean.html')
+		context = {}
+		faculty_obj=faculty.objects.all()
+		global error_message
+		
+		global good_message
+		
+		context = {'faculty_obj':faculty_obj,'error_message':error_message,'good_message':good_message}
+		error_message=''
+		good_message=''
+		return HttpResponse(template.render(context,request))
+	else:
+		return redirect('/dean_staff_office/')
+
+def dean_db(request):
+	global error_message
+	
+	global good_message
+	
+	if request.session.has_key('staff_id'):
+		faculty_id=request.POST['faculty']
+		faculty_obj=faculty.objects.get(faculty_id=faculty_id)
+		dean_obj=dean.objects.all()
+		if dean_obj is not None:
+			for deans in dean_obj:
+				deans.delete()
+		good_message='Added succesfully'
+		dean_obj = dean(faculty_id=faculty_obj)
+		dean_obj.save()
+		return redirect('/dean_staff_office/add_dean')
+					
+					
+		
+	else:
+		return redirect('/dean_staff_office/')
+
 

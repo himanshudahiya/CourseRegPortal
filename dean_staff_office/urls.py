@@ -30,5 +30,7 @@ urlpatterns=[
 	url('^edit_faculty/(?P<faculty_id>[A-Za-z]*[0-9]+)', views.edit_faculty, name='edit_faculty'),
 	url('^faculty_edit_post/(?P<faculty_id_prev>[A-Za-z]*[0-9]+)', views.faculty_edit_post, name='faculty_edit_post'),
 	url('^portal_open_close/', views.portal_open_close, name='portal_open_close'),
-	url('^portals_post/', views.portals_post, name='portals_post')
+	url('^portals_post/', views.portals_post, name='portals_post'),
+	url('^add_dean/', views.add_dean, name='add_dean'),
+	url('^dean_db/', views.dean_db, name='dean_db')
 ]
